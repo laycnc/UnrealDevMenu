@@ -1,5 +1,6 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
+#include "UnrealDevMenuEditorModule.h"
 #include "Modules/ModuleManager.h"
 #include "AssetToolsModule.h"
 #include "PropertyEditorModule.h"

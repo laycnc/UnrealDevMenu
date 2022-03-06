@@ -41,8 +41,10 @@ public class UnrealDevMenuEditor : ModuleRules
                 "ImGui",
                 "UnrealEd",
                 "AssetTools",
-                "PropertyEditor",
                 "EditorStyle",
+                "PropertyEditor",
+                "KismetWidgets",
+                "PropertyEditor",
                 "UnrealDevMenu",
 				// ... add private dependencies that you statically link with here ...	
 			}

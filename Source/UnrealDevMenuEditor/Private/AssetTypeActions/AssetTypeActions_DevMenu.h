@@ -20,4 +20,7 @@ public:
 	virtual void    GetActions(const TArray<UObject*>&  InObjects,
 	                           struct FToolMenuSection& Section) override;
 	virtual uint32  GetCategories() override;
+	virtual void    OpenAssetEditor(
+	       const TArray<UObject*>&        InObjects,
+	       TSharedPtr<class IToolkitHost> EditWithinLevelEditor) override;
 };

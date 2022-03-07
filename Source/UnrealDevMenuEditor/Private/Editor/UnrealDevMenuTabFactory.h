@@ -38,8 +38,6 @@ public:
 
 	virtual TSharedRef<SWidget> CreateTabBody(
 	    const FWorkflowTabSpawnInfo& Info) const override;
-	virtual FText GetTabToolTipText(
-	    const FWorkflowTabSpawnInfo& Info) const override;
 
 protected:
 	TWeakPtr<FUnrealDevMenuEditor> DevMenuEditor;

@@ -29,9 +29,11 @@ public:
 	void UpdateGroupMenu(UDevMenuSubsystem& InSubsystem) const;
 
 	// メニューウインドウの表示
-	void UpdateMenuWindow(UDevMenuSubsystem& InSubsystem,
-	                      FDevMenuSubWindowInfo&  WindowInfo) const;
+	void UpdateMenuWindow(UDevMenuSubsystem&     InSubsystem,
+	                      FDevMenuSubWindowInfo& WindowInfo) const;
 
+	// 子階層を取得する
+	void GetChildren(TArray<UDevMenuItemBase*>& OutChildren) const;
 public:
 	// デバッグメニューの識別子(必須)
 	UPROPERTY(EditDefaultsOnly)

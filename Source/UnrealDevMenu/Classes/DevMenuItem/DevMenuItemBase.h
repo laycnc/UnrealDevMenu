@@ -20,15 +20,18 @@ public:
 	// 実行用のインスタンスを作成する
 	void GeneratedInstance(UDevMenuSubsystem& InSubsystem) const;
 	// 初期化
-	virtual void Initialize(UDevMenuSubsystem& InSubsystem,
-	                        UDevMenuInstanceBase*   InInstance) const;
+	virtual void Initialize(UDevMenuSubsystem&    InSubsystem,
+	                        UDevMenuInstanceBase* InInstance) const;
 	// メニューの更新処理
-	virtual void UpdateMenu(UDevMenuSubsystem& InSubsystem,
-	                        UDevMenuInstanceBase*   InInstance) const;
+	virtual void UpdateMenu(UDevMenuSubsystem&    InSubsystem,
+	                        UDevMenuInstanceBase* InInstance) const;
+
+	// 子階層を取得する
+	virtual void GetChildren(TArray<UDevMenuItemBase*>& OutChildren);
 
 protected:
 	// メニューの説明が存在するか？
-	bool        HasTooltip() const;
+	bool HasTooltip() const;
 
 public:
 	// インスタンスクラス

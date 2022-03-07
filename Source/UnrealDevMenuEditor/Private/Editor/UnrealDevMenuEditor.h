@@ -78,6 +78,7 @@ public:
 	}
 public:
 	TSharedRef<SWidget> SpawnDetails();
+	void                OnChangeHierarchyItem(UObject* NewObject);
 
 private:
 	UDevMenu* DevMenuEdited = nullptr;

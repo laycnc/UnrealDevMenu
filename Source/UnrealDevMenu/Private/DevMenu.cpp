@@ -82,8 +82,8 @@ void UDevMenu::UpdateGroupMenu(UDevMenuSubsystem& InSubsystem) const
 }
 
 // メニューウインドウの表示
-void UDevMenu::UpdateMenuWindow(UDevMenuSubsystem& InSubsystem,
-                                FDevMenuSubWindowInfo&  WindowInfo) const
+void UDevMenu::UpdateMenuWindow(UDevMenuSubsystem&     InSubsystem,
+                                FDevMenuSubWindowInfo& WindowInfo) const
 {
 #if WITH_IMGUI
 
@@ -146,6 +146,18 @@ void UDevMenu::UpdateMenuWindow(UDevMenuSubsystem& InSubsystem,
 		}
 	}
 #endif // WITH_IMGUI
+}
+
+// 子階層を取得する
+void UDevMenu::GetChildren(TArray<UDevMenuItemBase*>& OutChildren) const
+{
+	for ( auto Item : Items )
+	{
+		if ( Item )
+		{
+			OutChildren.Add(Item);
+		}
+	}
 }
 
 #undef LOCTEXT_NAMESPACE

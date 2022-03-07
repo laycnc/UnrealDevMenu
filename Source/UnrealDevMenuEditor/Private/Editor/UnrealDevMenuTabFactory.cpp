@@ -3,6 +3,7 @@
 #include "Styling/AppStyle.h"
 #include "Widgets/Docking/SDockTab.h"
 #include "UnrealDevMenuEditor.h"
+#include "SDevMenuHierarchy.h"
 
 //////////////////////////////////////////////////////////////////////////
 // FDevMenuLibraryTabSummoner
@@ -55,7 +56,9 @@ FDevMenuHierarchyTabSummoner::FDevMenuHierarchyTabSummoner(
 TSharedRef<SWidget> FDevMenuHierarchyTabSummoner::CreateTabBody(
     const FWorkflowTabSpawnInfo& Info) const
 {
-	return SNew(SBox);
+	return SNew(SDevMenuHierarchyView, DevMenuEditor.Pin())
+	    .OnChangeHierarchyItem(DevMenuEditor.Pin().Get(),
+	                           &FUnrealDevMenuEditor::OnChangeHierarchyItem);
 }
 
 #undef LOCTEXT_NAMESPACE
@@ -85,13 +88,6 @@ TSharedRef<SWidget> FDevMenuDetailsSummoner::CreateTabBody(
 {
 	check(DevMenuEditor.IsValid());
 	return DevMenuEditor.Pin()->SpawnDetails();
-}
-
-FText FDevMenuDetailsSummoner::GetTabToolTipText(
-    const FWorkflowTabSpawnInfo& Info) const
-{
-	return LOCTEXT("BlackboardDetailsTabTooltip",
-	               "The details tab is for editing blackboard entries.");
 }
 
 #undef LOCTEXT_NAMESPACE

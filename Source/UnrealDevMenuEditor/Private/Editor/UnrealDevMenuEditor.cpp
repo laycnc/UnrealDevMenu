@@ -181,4 +181,13 @@ TSharedRef<SWidget> FUnrealDevMenuEditor::SpawnDetails()
 	return DetailsView.ToSharedRef();
 }
 
+void FUnrealDevMenuEditor::OnChangeHierarchyItem(UObject* NewObject)
+{
+	//
+	if ( DetailsView.IsValid() )
+	{
+		DetailsView->SetObject(NewObject);
+	}
+}
+
 #undef LOCTEXT_NAMESPACE

@@ -25,15 +25,21 @@ void UDevMenuItemBase::GeneratedInstance(UDevMenuSubsystem& InSubsystem) const
 }
 
 // 初期化
-void UDevMenuItemBase::Initialize(UDevMenuSubsystem& InSubsystem,
-                                  UDevMenuInstanceBase*   InInstance) const
+void UDevMenuItemBase::Initialize(UDevMenuSubsystem&    InSubsystem,
+                                  UDevMenuInstanceBase* InInstance) const
 {
 }
 
 // メニューの更新処理
-void UDevMenuItemBase::UpdateMenu(UDevMenuSubsystem& InSubsystem,
-                                  UDevMenuInstanceBase*   InInstance) const
+void UDevMenuItemBase::UpdateMenu(UDevMenuSubsystem&    InSubsystem,
+                                  UDevMenuInstanceBase* InInstance) const
 {
+}
+
+// 子階層を取得する
+void UDevMenuItemBase::GetChildren(TArray<UDevMenuItemBase*>& OutChildren)
+{
+	(void)OutChildren;
 }
 
 // メニューの説明を取得

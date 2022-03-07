@@ -38,7 +38,7 @@ public class UnrealDevMenuEditor : ModuleRules
                 "Engine",
                 "Slate",
                 "SlateCore",
-                "ImGui",
+                "InputCore",
                 "UnrealEd",
                 "AssetTools",
                 "EditorStyle",
@@ -46,6 +46,7 @@ public class UnrealDevMenuEditor : ModuleRules
                 "KismetWidgets",
                 "PropertyEditor",
                 "UnrealDevMenu",
+                "ImGui",
 				// ... add private dependencies that you statically link with here ...	
 			}
             );

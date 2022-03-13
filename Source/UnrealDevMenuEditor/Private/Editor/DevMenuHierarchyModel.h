@@ -26,6 +26,10 @@ public:
 	void             GetFilterStrings(TArray<FString>& OutString) const;
 	virtual FText    GetMenuName() const;
 	virtual UObject* GetObject() const;
+	// 子項目を挿入出来るか？
+	virtual bool CanInsertChildItem() const;
+	// 新規メニュー項目を追加する
+	virtual bool AddNewMenuItem(UClass* NewClass) const;
 protected:
 	virtual void GetChildren(TArray<TSharedPtr<FDevMenuHierarchyModel>>& Children);
 };
@@ -40,8 +44,12 @@ public:
 
 	virtual FText    GetMenuName() const override;
 	virtual UObject* GetObject() const override;
-	virtual void     GetChildren(
-	        TArray<TSharedPtr<FDevMenuHierarchyModel>>& Children) override;
+	// 子項目を挿入出来るか？
+	virtual bool CanInsertChildItem() const override;
+	// 新規メニュー項目を追加する
+	virtual bool AddNewMenuItem(UClass* NewClass) const override;
+	virtual void GetChildren(
+	    TArray<TSharedPtr<FDevMenuHierarchyModel>>& Children) override;
 
 private:
 	TWeakObjectPtr<UDevMenuItemBase> HostItem;
@@ -57,9 +65,12 @@ public:
 
 	virtual FText    GetMenuName() const override;
 	virtual UObject* GetObject() const override;
-	virtual void     GetChildren(
-	        TArray<TSharedPtr<FDevMenuHierarchyModel>>& Children) override;
-
+	// 子項目を挿入出来るか？
+	virtual bool CanInsertChildItem() const override;
+	// 新規メニュー項目を追加する
+	virtual bool AddNewMenuItem(UClass* NewClass) const override;
+	virtual void GetChildren(
+	    TArray<TSharedPtr<FDevMenuHierarchyModel>>& Children) override;
 private:
 	TWeakObjectPtr<UDevMenu> HostItem;
 };

@@ -49,13 +49,12 @@ private:
 	// ツリービューをリフレッシュする
 	void                  RefreshTreeView();
 	void                  OnSearchChanged(const FText& InFilterText);
-	TSharedRef<ITableRow> MenuHierarchy_OnGenerateRow(
+	TSharedRef<ITableRow> OnGenerateRow(
 	    TSharedPtr<FDevMenuHierarchyModel> InItem,
 	    const TSharedRef<STableViewBase>&  OwnerTable);
-	void Hierarchy_OnGetChildren(FTreeViewItem          InParent,
-	                             TArray<FTreeViewItem>& OutChildren);
-	void Hierarchy_OnSelectionChanged(FTreeViewItem     SelectedItem,
-	                                  ESelectInfo::Type SelectInfo);
+	void OnGetChildren(FTreeViewItem InParent, TArray<FTreeViewItem>& OutChildren);
+	void OnSelectionChanged(FTreeViewItem     SelectedItem,
+	                        ESelectInfo::Type SelectInfo);
 	void GetFilterStrings(FTreeViewItem Item, TArray<FString>& OutString);
 private:
 	TArray<FTreeViewItem> RootMenus;

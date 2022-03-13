@@ -62,6 +62,8 @@ public:
 	    const TSharedRef<STableViewBase>& OwnerTable) override;
 	virtual void GetChildren(
 	    TArray<TSharedPtr<FDevMenuItemViewModel>>& OutChildren) override;
+	FReply OnDraggingWidgetTemplateItem(const FGeometry&     MyGeometry,
+	                                    const FPointerEvent& MouseEvent);
 
 protected:
 	FGraphNodeClassData ClassData;

@@ -160,4 +160,22 @@ void UDevMenu::GetChildren(TArray<UDevMenuItemBase*>& OutChildren) const
 	}
 }
 
+#if WITH_EDITOR
+
+bool UDevMenu::AddNewMenuItem(UClass* NewClass)
+{
+	if ( NewClass )
+	{
+		UDevMenuItemBase* NewItem = NewObject<UDevMenuItemBase>(this, NewClass);
+		if ( NewItem )
+		{
+			Items.Add(NewItem);
+			return true;
+		}
+	}
+	return false;
+}
+
+#endif
+
 #undef LOCTEXT_NAMESPACE

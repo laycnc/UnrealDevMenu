@@ -34,6 +34,15 @@ public:
 
 	// 子階層を取得する
 	void GetChildren(TArray<UDevMenuItemBase*>& OutChildren) const;
+
+public:
+#if WITH_EDITOR
+
+    // 新規メニュー項目を追加する
+	bool AddNewMenuItem(UClass* NewClass);
+
+#endif
+
 public:
 	// デバッグメニューの識別子(必須)
 	UPROPERTY(EditDefaultsOnly)

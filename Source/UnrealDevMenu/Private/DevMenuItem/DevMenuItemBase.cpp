@@ -47,3 +47,13 @@ bool UDevMenuItemBase::HasTooltip() const
 {
 	return !Tooltip.IsEmpty();
 }
+
+#if WITH_EDITOR
+
+// 子項目を挿入出来るか？
+bool UDevMenuItemBase::CanInsertChildItem() const
+{
+	return false;
+}
+
+#endif

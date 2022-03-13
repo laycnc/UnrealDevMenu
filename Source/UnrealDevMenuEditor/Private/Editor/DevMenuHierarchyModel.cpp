@@ -31,6 +31,18 @@ UObject* FDevMenuHierarchyModel::GetObject() const
 	return nullptr;
 }
 
+bool FDevMenuHierarchyModel::CanInsertChildItem() const
+{
+	return false;
+}
+
+// 新規メニュー項目を追加する
+bool FDevMenuHierarchyModel::AddNewMenuItem(UClass* NewClass) const
+{
+	static_cast<void>(NewClass);
+	return false;
+}
+
 void FDevMenuHierarchyModel::GetChildren(
     TArray<TSharedPtr<FDevMenuHierarchyModel>>& Children)
 {
@@ -53,6 +65,18 @@ FText FDevMenuHierarchyItem::GetMenuName() const
 UObject* FDevMenuHierarchyItem::GetObject() const
 {
 	return HostItem.Get();
+}
+
+// 子項目を挿入出来るか？
+bool FDevMenuHierarchyItem::CanInsertChildItem() const
+{
+	return false;
+}
+
+bool FDevMenuHierarchyItem::AddNewMenuItem(UClass* NewClass) const
+{
+	static_cast<void>(NewClass);
+	return false;
 }
 
 void FDevMenuHierarchyItem::GetChildren(
@@ -87,6 +111,23 @@ FText FDevMenuHierarchyRoot::GetMenuName() const
 UObject* FDevMenuHierarchyRoot::GetObject() const
 {
 	return HostItem.Get();
+}
+
+// 子項目を挿入出来るか？
+bool FDevMenuHierarchyRoot::CanInsertChildItem() const
+{
+	// Rootの下にはぶら下げられる
+	return true;
+}
+
+// 新規メニュー項目を追加する
+bool FDevMenuHierarchyRoot::AddNewMenuItem(UClass* NewClass) const
+{
+	if ( HostItem.IsValid() )
+	{
+		return HostItem->AddNewMenuItem(NewClass);
+	}
+	return false;
 }
 
 void FDevMenuHierarchyRoot::GetChildren(

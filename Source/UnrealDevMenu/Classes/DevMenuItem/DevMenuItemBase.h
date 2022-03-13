@@ -33,6 +33,13 @@ protected:
 	// メニューの説明が存在するか？
 	bool HasTooltip() const;
 
+#if WITH_EDITOR
+public:
+	// 子項目を挿入出来るか？
+	virtual bool CanInsertChildItem() const;
+
+#endif
+
 public:
 	// インスタンスクラス
 	UPROPERTY()

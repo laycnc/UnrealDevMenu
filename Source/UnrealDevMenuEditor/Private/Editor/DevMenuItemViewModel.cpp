@@ -2,6 +2,8 @@
 #include "DevMenuItemViewModel.h"
 #include "UnrealDevMenuEditorModule.h"
 #include "AIGraphTypes.h"
+#include "DragDrop/MenuTemplateDragDropOp.h"
+#include "IDocumentation.h"
 
 #define LOCTEXT_NAMESPACE "DevMenuItemViewModel"
 
@@ -42,10 +44,9 @@ TSharedRef<ITableRow> FDevMenuItemCategoryViewModel::BuildRow(
 
 	// clang-format off
 	return SNew(STableRow<TSharedPtr<FDevMenuItemViewModel>>, OwnerTable)
-	    .Padding(2.0f)
-	    .ShowSelection(false)
-	    .ShowWires(false)
-	    .Style(FEditorStyle::Get(), "UMGEditor.LibraryView")
+		.Padding(5.0f)
+		.ShowSelection(false)
+	    .Style(FEditorStyle::Get(), "UMGEditor.PaletteHeader")
         [
 			SNew(STextBlock)
 			.TransformPolicy(ETextTransformPolicy::ToUpper)
@@ -103,19 +104,36 @@ void FDevMenuItemClassViewModel::GetFilterStrings(TArray<FString>& OutString) co
 TSharedRef<ITableRow> FDevMenuItemClassViewModel::BuildRow(
     const TSharedRef<STableViewBase>& OwnerTable)
 {
+	const UClass* Class = ClassData.GetClass();
+	const FText   ClassName =
+        IsValid(Class) ? FText::FromString(Class->GetName()) : FText::GetEmpty();
+	const FText Description = Class->GetToolTipText();
+
+	// clang-format off
 	return SNew(STableRow<TSharedPtr<FDevMenuItemViewModel>>, OwnerTable)
 	    .Padding(5.0f)
-	    .ShowSelection(
-	        false)[SNew(STextBlock)
-	                   .TransformPolicy(ETextTransformPolicy::ToUpper)
-	                   .Text(FText::FromString(ClassData.GetClassName()))
-	                   .Font(FAppStyle::Get().GetFontStyle("SmallFontBold"))];
+	    .OnDragDetected(this, &FDevMenuItemClassViewModel::OnDraggingWidgetTemplateItem)
+		.ToolTip(IDocumentation::Get()->CreateToolTip(Description, nullptr, TEXT(""), TEXT("")))
+	    .ShowSelection(false)
+        [
+            SNew(STextBlock)
+            .Text(ClassName)
+            .Font(FAppStyle::Get().GetFontStyle("SmallFontBold"))
+        ];
+	// clang-format on
 }
 
 void FDevMenuItemClassViewModel::GetChildren(
     TArray<TSharedPtr<FDevMenuItemViewModel>>& OutChildren)
 {
 	static_cast<void>(OutChildren);
+}
+
+FReply FDevMenuItemClassViewModel::OnDraggingWidgetTemplateItem(
+    const FGeometry&     MyGeometry,
+    const FPointerEvent& MouseEvent)
+{
+	return FReply::Handled().BeginDragDrop(FMenuTemplateDragDropOp::New(ClassData));
 }
 
 #undef LOCTEXT_NAMESPACE

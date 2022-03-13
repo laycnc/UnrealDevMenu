@@ -23,7 +23,7 @@ void SDevMenuHierarchyView::Construct(const FArguments&                InArgs,
 	FilterHandler->SetRootItems(&RootMenus, &TreeRootMenus);
 	FilterHandler->SetGetChildrenDelegate(
 	    TreeFilterHandler<FTreeViewItem>::FOnGetChildren::CreateRaw(
-	        this, &SDevMenuHierarchyView::Hierarchy_OnGetChildren));
+	        this, &SDevMenuHierarchyView::OnGetChildren));
 
 	// clang-format off
     ChildSlot
@@ -97,16 +97,13 @@ void SDevMenuHierarchyView::ReBuildTreeView()
 
 	//
 	MenuTreeView =
-	    SNew(STreeView<TSharedPtr<FDevMenuHierarchyModel>>)
+	    SNew(STreeView<FTreeViewItem>)
 	        .ItemHeight(20.f)
 	        .SelectionMode(ESelectionMode::Single)
-	        .OnGetChildren(
-	            FilterHandler.ToSharedRef(),
-	            &TreeFilterHandler<
-	                TSharedPtr<FDevMenuHierarchyModel>>::OnGetFilteredChildren)
-	        .OnGenerateRow(this, &SDevMenuHierarchyView::MenuHierarchy_OnGenerateRow)
-	        .OnSelectionChanged(this,
-	                            &SDevMenuHierarchyView::Hierarchy_OnSelectionChanged)
+	        .OnGetChildren(FilterHandler.ToSharedRef(),
+	                       &TreeFilterHandler<FTreeViewItem>::OnGetFilteredChildren)
+	        .OnGenerateRow(this, &SDevMenuHierarchyView::OnGenerateRow)
+	        .OnSelectionChanged(this, &SDevMenuHierarchyView::OnSelectionChanged)
 	        .TreeItemsSource(&TreeRootMenus);
 
 	FilterHandler->SetTreeView(MenuTreeView.Get());
@@ -118,25 +115,23 @@ void SDevMenuHierarchyView::ReBuildTreeView()
 	MenuTreeView->SetScrollOffset(OldScrollOffset);
 }
 
-TSharedRef<ITableRow> SDevMenuHierarchyView::MenuHierarchy_OnGenerateRow(
-    TSharedPtr<FDevMenuHierarchyModel> InItem,
-    const TSharedRef<STableViewBase>&  OwnerTable)
+TSharedRef<ITableRow> SDevMenuHierarchyView::OnGenerateRow(
+    FTreeViewItem                     InItem,
+    const TSharedRef<STableViewBase>& OwnerTable)
 {
 	return SNew(SDevMenuHierarchyViewItem, OwnerTable, InItem)
 	    //.HighlightText(this, &SHierarchyView::GetSearchText)
 	    ;
 }
 
-void SDevMenuHierarchyView::Hierarchy_OnGetChildren(
-    FTreeViewItem          InParent,
-    TArray<FTreeViewItem>& OutChildren)
+void SDevMenuHierarchyView::OnGetChildren(FTreeViewItem          InParent,
+                                          TArray<FTreeViewItem>& OutChildren)
 {
 	InParent->GatherChildren(OutChildren);
 }
 
-void SDevMenuHierarchyView::Hierarchy_OnSelectionChanged(
-    FTreeViewItem     SelectedItem,
-    ESelectInfo::Type SelectInfo)
+void SDevMenuHierarchyView::OnSelectionChanged(FTreeViewItem     SelectedItem,
+                                               ESelectInfo::Type SelectInfo)
 {
 	if ( SelectedItem.IsValid() )
 	{

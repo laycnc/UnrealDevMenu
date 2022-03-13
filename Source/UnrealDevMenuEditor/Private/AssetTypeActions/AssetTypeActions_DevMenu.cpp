@@ -45,7 +45,26 @@ void FAssetTypeActions_DevMenu::OpenAssetEditor(
 
 	for ( UObject* ObjIt : InObjects )
 	{
-		if ( UDevMenu* DevMenu = Cast<UDevMenu>(ObjIt) )
+		UDevMenu* DevMenu = Cast<UDevMenu>(ObjIt);
+		if ( DevMenu == nullptr )
+		{
+			continue;
+		}
+
+		const bool            bFocusIfOpen = false;
+		IAssetEditorInstance* EditorInstance =
+		    GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->FindEditorForAsset(
+		        DevMenu, bFocusIfOpen);
+		FUnrealDevMenuEditor* ExistingInstance =
+		    static_cast<FUnrealDevMenuEditor*>(EditorInstance);
+
+		if ( ExistingInstance && ExistingInstance->GetDevMenuEdited() == nullptr )
+		{
+			// 既存のエディターがあるのでそれを流用する
+			ExistingInstance->InitDevMenuEditor(
+			    Mode, EditWithinLevelEditor, DevMenu);
+		}
+		else
 		{
 			TSharedRef<FUnrealDevMenuEditor> NewDevMenuEditor(
 			    new FUnrealDevMenuEditor());

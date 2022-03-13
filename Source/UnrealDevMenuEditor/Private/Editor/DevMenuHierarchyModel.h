@@ -18,7 +18,7 @@ class FUnrealDevMenuEditor;
 class FDevMenuHierarchyModel : public TSharedFromThis<FDevMenuHierarchyModel>
 {
 public:
-	FDevMenuHierarchyModel(TSharedPtr<FUnrealDevMenuEditor> InEditor);
+	FDevMenuHierarchyModel();
 	virtual ~FDevMenuHierarchyModel() {}
 
 	void GatherChildren(TArray<TSharedPtr<FDevMenuHierarchyModel>>& Children);
@@ -28,9 +28,6 @@ public:
 	virtual UObject* GetObject() const;
 protected:
 	virtual void GetChildren(TArray<TSharedPtr<FDevMenuHierarchyModel>>& Children);
-
-protected:
-	TSharedPtr<FUnrealDevMenuEditor> Editor;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -39,8 +36,7 @@ protected:
 class FDevMenuHierarchyItem : public FDevMenuHierarchyModel
 {
 public:
-	FDevMenuHierarchyItem(TSharedPtr<FUnrealDevMenuEditor> InEditor,
-	                      UDevMenuItemBase*                InItem);
+	FDevMenuHierarchyItem(UDevMenuItemBase* InItem);
 
 	virtual FText    GetMenuName() const override;
 	virtual UObject* GetObject() const override;
@@ -57,8 +53,7 @@ private:
 class FDevMenuHierarchyRoot : public FDevMenuHierarchyModel
 {
 public:
-	FDevMenuHierarchyRoot(TSharedPtr<FUnrealDevMenuEditor> InEditor,
-	                      UDevMenu*                        InItem);
+	FDevMenuHierarchyRoot(UDevMenu* InItem);
 
 	virtual FText    GetMenuName() const override;
 	virtual UObject* GetObject() const override;

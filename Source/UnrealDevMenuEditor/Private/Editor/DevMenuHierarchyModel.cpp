@@ -7,11 +7,7 @@
 //////////////////////////////////////////////////////////////////////////
 // FDevMenuHierarchyModel
 
-FDevMenuHierarchyModel::FDevMenuHierarchyModel(
-    TSharedPtr<FUnrealDevMenuEditor> InEditor)
-    : Editor(InEditor)
-{
-}
+FDevMenuHierarchyModel::FDevMenuHierarchyModel() {}
 
 void FDevMenuHierarchyModel::GatherChildren(
     TArray<TSharedPtr<FDevMenuHierarchyModel>>& Children)
@@ -43,10 +39,8 @@ void FDevMenuHierarchyModel::GetChildren(
 //////////////////////////////////////////////////////////////////////////
 // FDevMenuHierarchyItem
 
-FDevMenuHierarchyItem::FDevMenuHierarchyItem(
-    TSharedPtr<FUnrealDevMenuEditor> InEditor,
-    UDevMenuItemBase*                InItem)
-    : FDevMenuHierarchyModel(InEditor)
+FDevMenuHierarchyItem::FDevMenuHierarchyItem(UDevMenuItemBase* InItem)
+    : FDevMenuHierarchyModel()
     , HostItem(InItem)
 {
 }
@@ -71,7 +65,7 @@ void FDevMenuHierarchyItem::GetChildren(
 
 		for ( UDevMenuItemBase* Item : ChildItems )
 		{
-			Children.Add(MakeShareable(new FDevMenuHierarchyItem(Editor, Item)));
+			Children.Add(MakeShareable(new FDevMenuHierarchyItem(Item)));
 		}
 	}
 }
@@ -79,10 +73,8 @@ void FDevMenuHierarchyItem::GetChildren(
 //////////////////////////////////////////////////////////////////////////
 // FDevMenuHierarchyRoot
 
-FDevMenuHierarchyRoot::FDevMenuHierarchyRoot(
-    TSharedPtr<FUnrealDevMenuEditor> InEditor,
-    UDevMenu*                        InItem)
-    : FDevMenuHierarchyModel(InEditor)
+FDevMenuHierarchyRoot::FDevMenuHierarchyRoot(UDevMenu* InItem)
+    : FDevMenuHierarchyModel()
     , HostItem(InItem)
 {
 }
@@ -107,7 +99,7 @@ void FDevMenuHierarchyRoot::GetChildren(
 
 		for ( UDevMenuItemBase* Item : ChildItems )
 		{
-			Children.Add(MakeShareable(new FDevMenuHierarchyItem(Editor, Item)));
+			Children.Add(MakeShareable(new FDevMenuHierarchyItem(Item)));
 		}
 	}
 }

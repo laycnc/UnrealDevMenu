@@ -16,22 +16,20 @@ class SBorder;
 class SSearchBox;
 class FMenuBuilder;
 class FUnrealDevMenuEditor;
-class FDevMenuHierarchyModel;
+class FDevMenuItemViewModel;
 
-class SDevMenuHierarchyView : public SCompoundWidget
+/**
+ * デバッグメニューの構成アイテムライブラリ画面
+ * 
+ * 配置出来る要素を表示する画面
+ */
+class SDevMenuLibraryView : public SCompoundWidget
 {
-public:
-	DECLARE_DELEGATE_OneParam(FOnChangeHierarchyItem, UObject*);
-
-	using FTreeViewItem   = TSharedPtr<FDevMenuHierarchyModel>;
+	using FTreeViewItem   = TSharedPtr<FDevMenuItemViewModel>;
 	using FMenuTextFilter = TTextFilter<FTreeViewItem>;
 
 public:
-	SLATE_BEGIN_ARGS(SDevMenuHierarchyView)
-	    : _OnChangeHierarchyItem()
-	{
-	}
-	SLATE_EVENT(FOnChangeHierarchyItem, OnChangeHierarchyItem)
+	SLATE_BEGIN_ARGS(SDevMenuLibraryView) {}
 	SLATE_END_ARGS()
 
 public:
@@ -42,33 +40,36 @@ public:
 	                  const double     InCurrentTime,
 	                  const float      InDeltaTime) override;
 	// End SWidget
-
 private:
 	// ツリービューを再構築する
 	void ReBuildTreeView();
 	// ツリービューをリフレッシュする
-	void                  RefreshTreeView();
-	void                  OnSearchChanged(const FText& InFilterText);
-	TSharedRef<ITableRow> MenuHierarchy_OnGenerateRow(
-	    TSharedPtr<FDevMenuHierarchyModel> InItem,
-	    const TSharedRef<STableViewBase>&  OwnerTable);
-	void Hierarchy_OnGetChildren(FTreeViewItem          InParent,
-	                             TArray<FTreeViewItem>& OutChildren);
-	void Hierarchy_OnSelectionChanged(FTreeViewItem     SelectedItem,
-	                                  ESelectInfo::Type SelectInfo);
+	void RefreshTreeView();
+
+	// ツリーの構築を取得する
+	void OnGetChildren(FTreeViewItem InParent, TArray<FTreeViewItem>& OutChildren);
+	void OnSelectionChanged(FTreeViewItem     SelectedItem,
+	                        ESelectInfo::Type SelectInfo);
+
+	TSharedRef<ITableRow> OnGenerateRow(
+	    FTreeViewItem                     InItem,
+	    const TSharedRef<STableViewBase>& OwnerTable);
+
+	// 検索ボックスの値を変更した時
+	void OnSearchChanged(const FText& InFilterText);
+	// フィルタイング用のテキストを取得する
 	void GetFilterStrings(FTreeViewItem Item, TArray<FString>& OutString);
 private:
-	TArray<FTreeViewItem> RootMenus;
 	TArray<FTreeViewItem> TreeRootMenus;
 
 private:
 	TWeakPtr<FUnrealDevMenuEditor>               Editor;
 	TSharedPtr<SSearchBox>                       SearchBox;
 	TSharedPtr<FMenuTextFilter>                  SearchBoxMenuFilter;
-	TSharedPtr<SBorder>                          TreeViewArea;
+	TSharedPtr<SBorder>                          ClassViewArea;
 	TSharedPtr<STreeView<FTreeViewItem>>         MenuTreeView;
 	TSharedPtr<TreeFilterHandler<FTreeViewItem>> FilterHandler;
-	FOnChangeHierarchyItem                       OnChangeHierarchyItem;
+
 private:
 	// ツリーの再構成リクエスト
 	bool bRebuildTreeRequested = false;

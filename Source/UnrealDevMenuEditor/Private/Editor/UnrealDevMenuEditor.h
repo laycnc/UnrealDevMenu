@@ -10,6 +10,7 @@
 
 class IDetailsView;
 class UDevMenu;
+class FDevMenuItemViewModel;
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -41,6 +42,7 @@ public:
 
 public:
 	FUnrealDevMenuEditor();
+	~FUnrealDevMenuEditor();
 
 	// IToolkit interface
 	virtual void RegisterTabSpawners(
@@ -79,10 +81,16 @@ public:
 public:
 	TSharedRef<SWidget> SpawnDetails();
 	void                OnChangeHierarchyItem(UObject* NewObject);
+	TArray<TSharedPtr<FDevMenuItemViewModel>>& GetMenuItemViewModel();
+
+private:
+	void GeneratedMenuItemClasses();
 
 private:
 	UDevMenu* DevMenuEdited = nullptr;
 
 	/** The details view we use to display the blackboard */
 	TSharedPtr<IDetailsView> DetailsView;
+	// メニューアイテム
+	TArray<TSharedPtr<FDevMenuItemViewModel>> MenuItemClasses;
 };

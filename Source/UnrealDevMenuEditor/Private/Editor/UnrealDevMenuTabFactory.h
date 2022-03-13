@@ -10,7 +10,7 @@ class FUnrealDevMenuEditor;
 struct FDevMenuLibraryTabSummoner : public FWorkflowTabFactory
 {
 public:
-	FDevMenuLibraryTabSummoner(TSharedPtr<FUnrealDevMenuEditor> InDevMenuEditor);
+	FDevMenuLibraryTabSummoner(TSharedRef<FUnrealDevMenuEditor> InDevMenuEditor);
 
 	virtual TSharedRef<SWidget> CreateTabBody(
 	    const FWorkflowTabSpawnInfo& Info) const override;
@@ -22,7 +22,7 @@ protected:
 struct FDevMenuHierarchyTabSummoner : public FWorkflowTabFactory
 {
 public:
-	FDevMenuHierarchyTabSummoner(TSharedPtr<FUnrealDevMenuEditor> InDevMenuEditor);
+	FDevMenuHierarchyTabSummoner(TSharedRef<FUnrealDevMenuEditor> InDevMenuEditor);
 
 	virtual TSharedRef<SWidget> CreateTabBody(
 	    const FWorkflowTabSpawnInfo& Info) const override;
@@ -34,7 +34,7 @@ protected:
 struct FDevMenuDetailsSummoner : public FWorkflowTabFactory
 {
 public:
-	FDevMenuDetailsSummoner(TSharedPtr<FUnrealDevMenuEditor> InDevMenuEditor);
+	FDevMenuDetailsSummoner(TSharedRef<FUnrealDevMenuEditor> InDevMenuEditor);
 
 	virtual TSharedRef<SWidget> CreateTabBody(
 	    const FWorkflowTabSpawnInfo& Info) const override;

@@ -6,18 +6,23 @@
 #include "PropertyEditorModule.h"
 #include "AssetTypeActions/AssetTypeActions_DevMenu.h"
 #include "Details/DevMenuBindingDetails.h"
+#include "AIGraphTypes.h"
 
 #define LOCTEXT_NAMESPACE "FDevMenuModule"
 
-class FUnrealDevMenuEditorModule : public IModuleInterface
+class FUnrealDevMenuEditorModule : public IUnrealDevMenuEditorModule
 {
 public:
 	/** IModuleInterface implementation */
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
 
+	// クラスキャッシュを取得する
+	virtual TSharedRef<FGraphNodeClassHelper> GetMenuItemClassCache() override;
 private:
 	TSharedPtr<IAssetTypeActions> Action;
+	// クラスキャッシュノード
+	TSharedPtr<FGraphNodeClassHelper> ClassCache;
 };
 
 void FUnrealDevMenuEditorModule::StartupModule()
@@ -57,6 +62,20 @@ void FUnrealDevMenuEditorModule::ShutdownModule()
 	        TEXT("PropertyEditor"));
 
 	PropertyModule.UnregisterCustomPropertyTypeLayout("DevMenuBinding");
+}
+
+// クラスキャッシュを取得する
+TSharedRef<FGraphNodeClassHelper> FUnrealDevMenuEditorModule::GetMenuItemClassCache()
+{
+	if ( !ClassCache.IsValid() )
+	{
+		// 初回呼び出しの時にクラスキャッシュを作成する
+		ClassCache = MakeShareable(
+		    new FGraphNodeClassHelper(UDevMenuItemBase::StaticClass()));
+		ClassCache->UpdateAvailableBlueprintClasses();
+	}
+
+	return ClassCache.ToSharedRef();
 }
 
 #undef LOCTEXT_NAMESPACE

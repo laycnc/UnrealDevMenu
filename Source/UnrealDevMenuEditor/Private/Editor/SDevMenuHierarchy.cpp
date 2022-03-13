@@ -12,7 +12,7 @@ void SDevMenuHierarchyView::Construct(const FArguments&                InArgs,
 {
 	OnChangeHierarchyItem = InArgs._OnChangeHierarchyItem;
 
-	Editor = InEditor;
+	Editor = InEditor.ToSharedRef();
 
 	SearchBoxMenuFilter = MakeShareable(
 	    new FMenuTextFilter(FMenuTextFilter::FItemToStringArray::CreateSP(
@@ -37,6 +37,7 @@ void SDevMenuHierarchyView::Construct(const FArguments&                InArgs,
 			.Padding(4)
 			.AutoHeight()
 			[
+                // サーチボックス
 				SAssignNew(SearchBox, SSearchBox)
 				.HintText(LOCTEXT("SearchWidgets", "Search Menu"))
 				.OnTextChanged(this, &SDevMenuHierarchyView::OnSearchChanged)
@@ -78,8 +79,8 @@ void SDevMenuHierarchyView::Tick(const FGeometry& AllottedGeometry,
 void SDevMenuHierarchyView::RefreshTreeView()
 {
 	RootMenus.Empty();
-	RootMenus.Add(MakeShareable(
-	    new FDevMenuHierarchyRoot(Editor, Editor->GetDevMenuEdited())));
+	RootMenus.Add(
+	    MakeShareable(new FDevMenuHierarchyRoot(Editor.Pin()->GetDevMenuEdited())));
 
 	FilterHandler->RefreshAndFilterTree();
 }
@@ -139,7 +140,7 @@ void SDevMenuHierarchyView::Hierarchy_OnSelectionChanged(
 {
 	if ( SelectedItem.IsValid() )
 	{
-        // 変更通知
+		// 変更通知
 		OnChangeHierarchyItem.ExecuteIfBound(SelectedItem->GetObject());
 	}
 }

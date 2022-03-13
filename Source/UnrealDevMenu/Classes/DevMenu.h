@@ -43,7 +43,7 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	bool bWindow;
 
-	UPROPERTY(EditDefaultsOnly, Instanced)
+	UPROPERTY(EditDefaultsOnly, Instanced, AdvancedDisplay)
 	TArray<TObjectPtr<UDevMenuItemBase>> Items;
 
 private:

@@ -10,12 +10,12 @@ FDevMenuEditorApplicationModes::FDevMenuEditorApplicationModes(
 {
 	DevMenuEditor = InDevMenuEditor;
 
+	EditorTabFactories.RegisterFactory(MakeShareable(
+	    new FDevMenuLibraryTabSummoner(InDevMenuEditor.ToSharedRef())));
+	EditorTabFactories.RegisterFactory(MakeShareable(
+	    new FDevMenuHierarchyTabSummoner(InDevMenuEditor.ToSharedRef())));
 	EditorTabFactories.RegisterFactory(
-	    MakeShareable(new FDevMenuLibraryTabSummoner(InDevMenuEditor)));
-	EditorTabFactories.RegisterFactory(
-	    MakeShareable(new FDevMenuHierarchyTabSummoner(InDevMenuEditor)));
-	EditorTabFactories.RegisterFactory(
-	    MakeShareable(new FDevMenuDetailsSummoner(InDevMenuEditor)));
+	    MakeShareable(new FDevMenuDetailsSummoner(InDevMenuEditor.ToSharedRef())));
 
 	// clang-format off
 	TabLayout = FTabManager::NewLayout("Standalone_UnrealDevMenuEditor_Layout_v2")

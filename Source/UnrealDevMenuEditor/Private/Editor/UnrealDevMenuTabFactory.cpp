@@ -4,6 +4,7 @@
 #include "Widgets/Docking/SDockTab.h"
 #include "UnrealDevMenuEditor.h"
 #include "SDevMenuHierarchy.h"
+#include "SDevMenuLibrary.h"
 
 //////////////////////////////////////////////////////////////////////////
 // FDevMenuLibraryTabSummoner
@@ -11,7 +12,7 @@
 #define LOCTEXT_NAMESPACE "FDevMenuLibraryTabSummoner"
 
 FDevMenuLibraryTabSummoner::FDevMenuLibraryTabSummoner(
-    TSharedPtr<FUnrealDevMenuEditor> InDevMenuEditor)
+    TSharedRef<FUnrealDevMenuEditor> InDevMenuEditor)
     : FWorkflowTabFactory(FUnrealDevMenuEditorTabs::LibraryID, InDevMenuEditor)
     , DevMenuEditor(InDevMenuEditor)
 {
@@ -28,7 +29,7 @@ FDevMenuLibraryTabSummoner::FDevMenuLibraryTabSummoner(
 TSharedRef<SWidget> FDevMenuLibraryTabSummoner::CreateTabBody(
     const FWorkflowTabSpawnInfo& Info) const
 {
-	return SNew(SBox);
+	return SNew(SDevMenuLibraryView, DevMenuEditor.Pin());
 }
 
 #undef LOCTEXT_NAMESPACE
@@ -39,7 +40,7 @@ TSharedRef<SWidget> FDevMenuLibraryTabSummoner::CreateTabBody(
 #define LOCTEXT_NAMESPACE "FDevMenuHierarchyTabSummoner"
 
 FDevMenuHierarchyTabSummoner::FDevMenuHierarchyTabSummoner(
-    TSharedPtr<FUnrealDevMenuEditor> InDevMenuEditor)
+    TSharedRef<FUnrealDevMenuEditor> InDevMenuEditor)
     : FWorkflowTabFactory(FUnrealDevMenuEditorTabs::HierarchyID, InDevMenuEditor)
     , DevMenuEditor(InDevMenuEditor)
 {
@@ -69,7 +70,7 @@ TSharedRef<SWidget> FDevMenuHierarchyTabSummoner::CreateTabBody(
 #define LOCTEXT_NAMESPACE "FDevMenuDetailsSummoner"
 
 FDevMenuDetailsSummoner::FDevMenuDetailsSummoner(
-    TSharedPtr<FUnrealDevMenuEditor> InDevMenuEditor)
+    TSharedRef<FUnrealDevMenuEditor> InDevMenuEditor)
     : FWorkflowTabFactory(FUnrealDevMenuEditorTabs::DetailsID, InDevMenuEditor)
     , DevMenuEditor(InDevMenuEditor)
 {

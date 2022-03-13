@@ -9,7 +9,7 @@
 /**
  * 
  */
-UCLASS()
+UCLASS(Category = "Input")
 class UDevMenuSliderInt : public UDevMenuItemBase
 {
 	GENERATED_UCLASS_BODY()

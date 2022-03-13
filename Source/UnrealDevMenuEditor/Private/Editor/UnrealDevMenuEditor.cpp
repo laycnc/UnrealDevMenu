@@ -6,7 +6,9 @@
 #include "DevMenuEditorApplicationModes.h"
 #include "PropertyEditorModule.h"
 #include "DetailsViewArgs.h"
-//
+#include "UnrealDevMenuEditorModule.h"
+#include "AIGraphTypes.h"
+
 #include "DevMenu.h"
 
 #define LOCTEXT_NAMESPACE "FUnrealDevMenuEditor"
@@ -75,9 +77,13 @@ void FUnrealDevMenuEditor::InitDevMenuEditor(
     const TSharedPtr<IToolkitHost>& InitToolkitHost,
     UDevMenu*                       InitDevMenu)
 {
-	GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->CloseOtherEditors(
-	    InitDevMenu, this);
+	//GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->CloseOtherEditors(
+	//    InitDevMenu, this);
+
 	DevMenuEdited = InitDevMenu;
+
+	// キャッシュを作成する
+	GeneratedMenuItemClasses();
 
 	// Initialize the asset editor and spawn nothing (dummy layout)
 	InitAssetEditor(Mode,
@@ -97,6 +103,8 @@ void FUnrealDevMenuEditor::InitDevMenuEditor(
 }
 
 FUnrealDevMenuEditor::FUnrealDevMenuEditor() {}
+
+FUnrealDevMenuEditor ::~FUnrealDevMenuEditor() {}
 
 // IToolkit interface
 void FUnrealDevMenuEditor::RegisterTabSpawners(
@@ -187,6 +195,41 @@ void FUnrealDevMenuEditor::OnChangeHierarchyItem(UObject* NewObject)
 	if ( DetailsView.IsValid() )
 	{
 		DetailsView->SetObject(NewObject);
+	}
+}
+
+TArray<TSharedPtr<FDevMenuItemViewModel>>& FUnrealDevMenuEditor::
+    GetMenuItemViewModel()
+{
+	return MenuItemClasses;
+}
+
+void FUnrealDevMenuEditor::GeneratedMenuItemClasses()
+{
+
+	IUnrealDevMenuEditorModule& Module =
+	    FModuleManager::GetModuleChecked<IUnrealDevMenuEditorModule>(
+	        TEXT("UnrealDevMenuEditor"));
+	TSharedRef<FGraphNodeClassHelper> ClassCache = Module.GetMenuItemClassCache();
+	TArray<FGraphNodeClassData>       NodeClasses;
+	ClassCache->GatherClasses(UDevMenuItemBase::StaticClass(), NodeClasses);
+
+	TArray<FString> Categorys;
+
+	// カテゴリ情報を収集する
+	for ( FGraphNodeClassData& Data : NodeClasses )
+	{
+		FText Category = Data.GetCategory();
+
+		// 含まれているかチェック
+		if ( !Categorys.Contains(Category.ToString()) )
+		{
+			Categorys.Add(Category.ToString());
+
+			// 初回だけカテゴリViewModelを作成する
+			MenuItemClasses.Add(MakeShareable(
+			    new FDevMenuItemCategoryViewModel(SharedThis(this), Category)));
+		}
 	}
 }
 

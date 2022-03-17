@@ -4,15 +4,23 @@
 #include "Widgets/Layout/SScrollBorder.h"
 #include "SDevMenuHierarchyItem.h"
 #include "DevMenuHierarchyModel.h"
+#include "UnrealDevMenuEditor.h"
 
 #define LOCTEXT_NAMESPACE "SDevMenuHierarchyView"
+
+SDevMenuHierarchyView ::~SDevMenuHierarchyView()
+{
+	Editor.Pin()->OnChangedMenu.Remove(ChangedMenuHandle);
+}
 
 void SDevMenuHierarchyView::Construct(const FArguments&                InArgs,
                                       TSharedPtr<FUnrealDevMenuEditor> InEditor)
 {
 	OnChangeHierarchyItem = InArgs._OnChangeHierarchyItem;
 
-	Editor = InEditor.ToSharedRef();
+	Editor            = InEditor.ToSharedRef();
+	ChangedMenuHandle = Editor.Pin()->OnChangedMenu.AddRaw(
+	    this, &SDevMenuHierarchyView::OnChangedMenu);
 
 	SearchBoxMenuFilter = MakeShareable(
 	    new FMenuTextFilter(FMenuTextFilter::FItemToStringArray::CreateSP(
@@ -65,11 +73,16 @@ void SDevMenuHierarchyView::Tick(const FGeometry& AllottedGeometry,
                                  const double     InCurrentTime,
                                  const float      InDeltaTime)
 {
-	if ( bRebuildTreeRequested )
+	if ( bRebuildTreeRequested || bRefreshTreeRequested )
 	{
+		if ( bRebuildTreeRequested )
+		{
+			ReBuildTreeView();
+		}
 		RefreshTreeView();
 
 		bRebuildTreeRequested = false;
+		bRefreshTreeRequested = false;
 	}
 }
 
@@ -83,6 +96,12 @@ void SDevMenuHierarchyView::RefreshTreeView()
 	    MakeShareable(new FDevMenuHierarchyRoot(Editor.Pin()->GetDevMenuEdited())));
 
 	FilterHandler->RefreshAndFilterTree();
+}
+
+// メニューが変更された
+void SDevMenuHierarchyView::OnChangedMenu()
+{
+	bRefreshTreeRequested = true;
 }
 
 // ツリービューを再構築する
@@ -119,7 +138,7 @@ TSharedRef<ITableRow> SDevMenuHierarchyView::OnGenerateRow(
     FTreeViewItem                     InItem,
     const TSharedRef<STableViewBase>& OwnerTable)
 {
-	return SNew(SDevMenuHierarchyViewItem, OwnerTable, InItem)
+	return SNew(SDevMenuHierarchyViewItem, Editor.Pin(), OwnerTable, InItem)
 	    //.HighlightText(this, &SHierarchyView::GetSearchText)
 	    ;
 }

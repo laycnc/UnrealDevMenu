@@ -35,6 +35,8 @@ public:
 	SLATE_END_ARGS()
 
 public:
+	~SDevMenuHierarchyView();
+
 	void Construct(const FArguments&                InArgs,
 	               TSharedPtr<FUnrealDevMenuEditor> InEditor);
 	// Begin SWidget
@@ -44,6 +46,9 @@ public:
 	// End SWidget
 
 private:
+	// メニューが変更された
+	void OnChangedMenu();
+
 	// ツリービューを再構築する
 	void ReBuildTreeView();
 	// ツリービューをリフレッシュする
@@ -71,4 +76,8 @@ private:
 private:
 	// ツリーの再構成リクエスト
 	bool bRebuildTreeRequested = false;
+	// ツリーのリフレッシュリクエスト
+	bool bRefreshTreeRequested = false;
+    // メニュー変更デリゲートハンドル
+    FDelegateHandle ChangedMenuHandle;
 };

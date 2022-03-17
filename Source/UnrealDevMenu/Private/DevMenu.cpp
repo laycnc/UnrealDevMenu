@@ -166,12 +166,15 @@ bool UDevMenu::AddNewMenuItem(UClass* NewClass)
 {
 	if ( NewClass )
 	{
+		// 指定されたクラスで新規アイテムを生成して追加する
 		UDevMenuItemBase* NewItem = NewObject<UDevMenuItemBase>(this, NewClass);
-		if ( NewItem )
-		{
-			Items.Add(NewItem);
-			return true;
-		}
+		Items.Add(NewItem);
+
+		// 変更扱いにする
+		SetFlags(RF_Transactional);
+		Modify();
+
+		return true;
 	}
 	return false;
 }

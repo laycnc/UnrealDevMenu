@@ -78,6 +78,12 @@ public:
 	{
 		return DevMenuEdited;
 	}
+
+    DECLARE_MULTICAST_DELEGATE(FOnChangedMenu);
+
+    // メニューが更新された
+	FOnChangedMenu OnChangedMenu;
+
 public:
 	TSharedRef<SWidget> SpawnDetails();
 	void                OnChangeHierarchyItem(UObject* NewObject);

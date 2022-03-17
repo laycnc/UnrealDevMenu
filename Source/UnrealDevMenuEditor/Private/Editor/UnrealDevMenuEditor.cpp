@@ -8,6 +8,7 @@
 #include "DetailsViewArgs.h"
 #include "UnrealDevMenuEditorModule.h"
 #include "AIGraphTypes.h"
+#include "DevMenuItem/DevMenuItemBase.h"
 
 #include "DevMenu.h"
 

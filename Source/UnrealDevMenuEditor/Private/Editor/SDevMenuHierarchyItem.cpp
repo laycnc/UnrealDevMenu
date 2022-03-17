@@ -7,10 +7,12 @@
 #define LOCTEXT_NAMESPACE "SDevMenuHierarchyViewItem"
 
 void SDevMenuHierarchyViewItem::Construct(
-    const FArguments&                  InArgs,
-    const TSharedRef<STableViewBase>&  InOwnerTableView,
-    TSharedPtr<FDevMenuHierarchyModel> InModel)
+    const FArguments&                       InArgs,
+    const TSharedPtr<FUnrealDevMenuEditor>& InEditor,
+    const TSharedRef<STableViewBase>&       InOwnerTableView,
+    TSharedPtr<FDevMenuHierarchyModel>      InModel)
 {
+	Editor = InEditor;
 	Model = InModel;
 
 	// clang-format off
@@ -98,6 +100,8 @@ FReply SDevMenuHierarchyViewItem::HandleAcceptDrop(
 		UClass* GeneratedClass = HierarchyDragDropOp->ClassData.GetClass();
 		if ( Item->AddNewMenuItem(GeneratedClass) )
 		{
+			Editor.Pin()->OnChangedMenu.Broadcast();
+
 			return FReply::Handled();
 		}
 	}

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 
+class FUnrealDevMenuEditor;
 class FDevMenuHierarchyModel;
 
 class SDevMenuHierarchyViewItem
@@ -20,9 +21,10 @@ public:
 	SLATE_END_ARGS()
 
 public:
-	void Construct(const FArguments&                  InArgs,
-	               const TSharedRef<STableViewBase>&  InOwnerTableView,
-	               TSharedPtr<FDevMenuHierarchyModel> InModel);
+	void Construct(const FArguments&                       InArgs,
+	               const TSharedPtr<FUnrealDevMenuEditor>& InEditor,
+	               const TSharedRef<STableViewBase>&       InOwnerTableView,
+	               TSharedPtr<FDevMenuHierarchyModel>      InModel);
 	virtual ~SDevMenuHierarchyViewItem();
 
 	// ドラッグを検出したときの処理
@@ -46,5 +48,6 @@ private:
 	FText GetMenuName() const;
 
 private:
+	TWeakPtr<FUnrealDevMenuEditor>     Editor;
 	TSharedPtr<FDevMenuHierarchyModel> Model;
 };

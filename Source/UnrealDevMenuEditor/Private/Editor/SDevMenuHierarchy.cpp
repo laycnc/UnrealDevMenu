@@ -203,7 +203,7 @@ void SDevMenuHierarchyView::UpdateExpansionRecursive(const FTreeViewItem& Item)
 
 void SDevMenuHierarchyView::OnSearchChanged(const FText& InFilterText)
 {
-	bRebuildTreeRequested        = true;
+	bRefreshTreeRequested            = true;
 	const bool bFilteringEnabled = !InFilterText.IsEmpty();
 	if ( bFilteringEnabled != FilterHandler->GetIsEnabled() )
 	{

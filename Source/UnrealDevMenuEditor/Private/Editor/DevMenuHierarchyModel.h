@@ -38,6 +38,10 @@ public:
 protected:
 	virtual void GetChildren(TArray<TSharedPtr<FDevMenuHierarchyModel>>& Children);
 private:
+    // 小階層
+	TArray<TSharedPtr<FDevMenuHierarchyModel>> ChildrenModels;
+    // 小階層を作成したか？
+	bool bInitializeChildren = false;
     // 展開状態
 	bool bIsExpanded = true;
 };

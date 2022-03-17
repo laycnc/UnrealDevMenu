@@ -12,7 +12,13 @@ FDevMenuHierarchyModel::FDevMenuHierarchyModel() {}
 void FDevMenuHierarchyModel::GatherChildren(
     TArray<TSharedPtr<FDevMenuHierarchyModel>>& Children)
 {
-	GetChildren(Children);
+	if ( !bInitializeChildren )
+	{
+		// 初回だけ行う
+		GetChildren(ChildrenModels);
+		bInitializeChildren = true;
+	}
+	Children.Append(ChildrenModels);
 }
 
 void FDevMenuHierarchyModel::GetFilterStrings(TArray<FString>& OutString) const

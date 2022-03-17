@@ -64,7 +64,7 @@ void SDevMenuHierarchyView::Construct(const FArguments&                InArgs,
 
 	ReBuildTreeView();
 
-	RefreshTreeView();
+	bRefreshTreeRequested = true;
 }
 
 // Begin SWidget
@@ -80,6 +80,8 @@ void SDevMenuHierarchyView::Tick(const FGeometry& AllottedGeometry,
 			ReBuildTreeView();
 		}
 		RefreshTreeView();
+
+        UpdateExpansionRecursive();
 
 		bRebuildTreeRequested = false;
 		bRefreshTreeRequested = false;
@@ -123,6 +125,8 @@ void SDevMenuHierarchyView::ReBuildTreeView()
 	                       &TreeFilterHandler<FTreeViewItem>::OnGetFilteredChildren)
 	        .OnGenerateRow(this, &SDevMenuHierarchyView::OnGenerateRow)
 	        .OnSelectionChanged(this, &SDevMenuHierarchyView::OnSelectionChanged)
+	        .OnSetExpansionRecursive(this,
+	                                 &SDevMenuHierarchyView::OnSetExpansionRecursive)
 	        .TreeItemsSource(&TreeRootMenus);
 
 	FilterHandler->SetTreeView(MenuTreeView.Get());
@@ -159,10 +163,42 @@ void SDevMenuHierarchyView::OnSelectionChanged(FTreeViewItem     SelectedItem,
 	}
 }
 
+// 展開状態が設定された時
+void SDevMenuHierarchyView::OnSetExpansionRecursive(FTreeViewItem Item,
+                                                    bool          bInExpansionState)
+{
+	Item->SetExpansion(bRebuildTreeRequested);
+}
+
 void SDevMenuHierarchyView::GetFilterStrings(FTreeViewItem    Item,
                                              TArray<FString>& OutString)
 {
 	Item->GetFilterStrings(OutString);
+}
+
+// 展開状態を更新する
+void SDevMenuHierarchyView::UpdateExpansionRecursive()
+{
+	for ( auto& Item : RootMenus )
+	{
+		UpdateExpansionRecursive(Item);
+	}
+}
+
+// 展開状態を更新する
+void SDevMenuHierarchyView::UpdateExpansionRecursive(const FTreeViewItem& Item)
+{
+	// メニュー側に現在の展開状態を設定する
+	MenuTreeView->SetItemExpansion(Item, Item->IsExpansion());
+
+    // 小階層の展開状態を再起ループで設定する
+	TArray < FTreeViewItem > Children;
+	Item->GatherChildren(Children);
+
+	for ( auto& ChildModel : Children )
+	{
+		UpdateExpansionRecursive(ChildModel);
+	}
 }
 
 void SDevMenuHierarchyView::OnSearchChanged(const FText& InFilterText)

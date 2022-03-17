@@ -43,6 +43,18 @@ bool FDevMenuHierarchyModel::AddNewMenuItem(UClass* NewClass) const
 	return false;
 }
 
+// 展開状態を設定する
+void FDevMenuHierarchyModel::SetExpansion(bool bNewExpanded)
+{
+	bIsExpanded = bNewExpanded;
+}
+
+// 展開状態か判定する
+bool FDevMenuHierarchyModel::IsExpansion() const
+{
+	return bIsExpanded;
+}
+
 void FDevMenuHierarchyModel::GetChildren(
     TArray<TSharedPtr<FDevMenuHierarchyModel>>& Children)
 {

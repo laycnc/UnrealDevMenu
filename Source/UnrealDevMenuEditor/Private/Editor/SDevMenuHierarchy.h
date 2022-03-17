@@ -60,7 +60,14 @@ private:
 	void OnGetChildren(FTreeViewItem InParent, TArray<FTreeViewItem>& OutChildren);
 	void OnSelectionChanged(FTreeViewItem     SelectedItem,
 	                        ESelectInfo::Type SelectInfo);
+	// 展開状態が設定された時
+	void OnSetExpansionRecursive(FTreeViewItem Item, bool bInExpansionState);
 	void GetFilterStrings(FTreeViewItem Item, TArray<FString>& OutString);
+
+	// 展開状態を更新する
+	void UpdateExpansionRecursive();
+	// 展開状態を更新する
+	void UpdateExpansionRecursive(const FTreeViewItem& Item);
 private:
 	TArray<FTreeViewItem> RootMenus;
 	TArray<FTreeViewItem> TreeRootMenus;
@@ -78,6 +85,6 @@ private:
 	bool bRebuildTreeRequested = false;
 	// ツリーのリフレッシュリクエスト
 	bool bRefreshTreeRequested = false;
-    // メニュー変更デリゲートハンドル
-    FDelegateHandle ChangedMenuHandle;
+	// メニュー変更デリゲートハンドル
+	FDelegateHandle ChangedMenuHandle;
 };

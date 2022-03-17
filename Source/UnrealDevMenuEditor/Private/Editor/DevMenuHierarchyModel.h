@@ -30,8 +30,16 @@ public:
 	virtual bool CanInsertChildItem() const;
 	// 新規メニュー項目を追加する
 	virtual bool AddNewMenuItem(UClass* NewClass) const;
+	// 展開状態を設定する
+	virtual void SetExpansion(bool bNewExpanded);
+	// 展開状態か判定する
+	virtual bool IsExpansion() const;
+
 protected:
 	virtual void GetChildren(TArray<TSharedPtr<FDevMenuHierarchyModel>>& Children);
+private:
+    // 展開状態
+	bool bIsExpanded = true;
 };
 
 //////////////////////////////////////////////////////////////////////////

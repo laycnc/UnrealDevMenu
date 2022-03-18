@@ -167,6 +167,31 @@ void FUnrealDevMenuEditor::NotifyPostChange(
     const FPropertyChangedEvent& PropertyChangedEvent,
     FProperty*                   PropertyThatChanged)
 {
+	if ( PropertyThatChanged == nullptr )
+	{
+		return;
+	}
+	const FString ChangeOwnerClassName =
+	    PropertyThatChanged->GetOwner<UStruct>()->GetName();
+	if ( ChangeOwnerClassName == TEXT("DevMenu") )
+	{
+		if ( PropertyThatChanged->GetFName() == TEXT("Items") )
+		{
+			// メニュー変更を呼ぶ
+			OnChangedMenu.Broadcast();
+			return;
+		}
+	}
+
+	if ( ChangeOwnerClassName == TEXT("DevMenuGroup") )
+	{
+		if ( PropertyThatChanged->GetFName() == TEXT("Items") )
+		{
+			// メニュー変更を呼ぶ
+			OnChangedMenu.Broadcast();
+			return;
+		}
+	}
 }
 
 // End of FNotifyHook

@@ -9,7 +9,8 @@
 #include "UnrealDevMenuEditorModule.h"
 #include "AIGraphTypes.h"
 #include "DevMenuItem/DevMenuItemBase.h"
-
+#include "Framework/Commands/GenericCommands.h"
+#include "Algo/AllOf.h"
 #include "DevMenu.h"
 
 #define LOCTEXT_NAMESPACE "FUnrealDevMenuEditor"
@@ -23,49 +24,6 @@ const FName UnrealDevMenuEditorAppName = FName(TEXT("UnrealDevMenuEditorApp"));
 const FName FUnrealDevMenuEditorTabs::DetailsID(TEXT("Details"));
 const FName FUnrealDevMenuEditorTabs::HierarchyID(TEXT("Hierarchy"));
 const FName FUnrealDevMenuEditorTabs::LibraryID(TEXT("Library"));
-
-//////////////////////////////////////////////////////////////////////////
-
-/////////////////////////////////////////////////////
-// SDevMenuPropertiesTabBody
-
-class SDevMenuPropertiesTabBody : public SSingleObjectDetailsPanel
-{
-public:
-	SLATE_BEGIN_ARGS(SDevMenuPropertiesTabBody) {}
-	SLATE_END_ARGS()
-
-private:
-	// Pointer back to owning sprite editor instance (the keeper of state)
-	TWeakPtr<FUnrealDevMenuEditor> DevMenuEditorPtr;
-public:
-	void Construct(const FArguments&                InArgs,
-	               TSharedPtr<FUnrealDevMenuEditor> InDevMenuEditor)
-	{
-		DevMenuEditorPtr = InDevMenuEditor;
-
-		SSingleObjectDetailsPanel::Construct(
-		    SSingleObjectDetailsPanel::FArguments()
-		        .HostCommandList(InDevMenuEditor->GetToolkitCommands())
-		        .HostTabManager(InDevMenuEditor->GetTabManager()),
-		    /*bAutomaticallyObserveViaGetObjectToObserve=*/true,
-		    /*bAllowSearch=*/true);
-	}
-
-	// SSingleObjectDetailsPanel interface
-	virtual UObject* GetObjectToObserve() const override
-	{
-		return DevMenuEditorPtr.Pin()->GetDevMenuEdited();
-	}
-
-	virtual TSharedRef<SWidget> PopulateSlot(
-	    TSharedRef<SWidget> PropertyEditorWidget) override
-	{
-		return SNew(SVerticalBox) +
-		       SVerticalBox::Slot().FillHeight(1)[PropertyEditorWidget];
-	}
-	// End of SSingleObjectDetailsPanel interface
-};
 
 //////////////////////////////////////////////////////////////////////////
 // UnrealDevMenuEditor
@@ -85,6 +43,9 @@ void FUnrealDevMenuEditor::InitDevMenuEditor(
 
 	// キャッシュを作成する
 	GeneratedMenuItemClasses();
+
+	// コマンドを初期化
+	InitializeCommands();
 
 	// Initialize the asset editor and spawn nothing (dummy layout)
 	InitAssetEditor(Mode,
@@ -257,6 +218,68 @@ void FUnrealDevMenuEditor::GeneratedMenuItemClasses()
 			    new FDevMenuItemCategoryViewModel(SharedThis(this), Category)));
 		}
 	}
+}
+
+//////////////////////////////////////////////////////////////////////////
+// Commands
+
+TSharedRef<FUICommandList> FUnrealDevMenuEditor::GetHierarchyCommandList() const
+{
+	return HierarchyCommandList.ToSharedRef();
+}
+
+// コマンドの初期化
+void FUnrealDevMenuEditor::InitializeCommands()
+{
+	//
+	HierarchyCommandList = MakeShared<FUICommandList>();
+
+	// delete commands
+	HierarchyCommandList->MapAction(
+	    FGenericCommands::Get().Delete,
+	    FExecuteAction::CreateSP(this, &FUnrealDevMenuEditor::DeleteSelectItem),
+	    FCanExecuteAction::CreateSP(this,
+	                                &FUnrealDevMenuEditor::CanDeleteSelectItem));
+}
+
+// 選択した項目を削除
+void FUnrealDevMenuEditor::DeleteSelectItem()
+{
+	bool        bDeleteItem     = false;
+	const auto& SelectedObjects = DetailsView->GetSelectedObjects();
+	for ( const auto& Obj : SelectedObjects )
+	{
+		UDevMenuItemBase* Item = Cast<UDevMenuItemBase>(Obj.Get());
+		if ( Item )
+		{
+			if ( DevMenuEdited->RemoveMenuItem(Item) )
+			{
+				bDeleteItem = true;
+			}
+		}
+	}
+	if ( bDeleteItem )
+	{
+        // 削除が行われたのでメニューをクリアする
+		OnChangedMenu.Broadcast();
+	}
+}
+
+// 選択した項目を削除出来るか？
+bool FUnrealDevMenuEditor::CanDeleteSelectItem() const
+{
+	if ( DetailsView.IsValid() )
+	{
+		const auto& SelectedObjects = DetailsView->GetSelectedObjects();
+
+		// 選択している項目がUDevMenuItemBaseのみであるか確認する
+		return Algo::AllOf(SelectedObjects,
+		                   [](const auto& InObj) -> bool
+		                   {
+			                   return InObj->IsA(UDevMenuItemBase::StaticClass());
+		                   });
+	}
+	return false;
 }
 
 #undef LOCTEXT_NAMESPACE

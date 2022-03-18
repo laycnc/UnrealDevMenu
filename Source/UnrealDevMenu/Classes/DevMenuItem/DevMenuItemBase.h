@@ -39,7 +39,8 @@ public:
 	virtual bool AddNewMenuItem(UClass* NewClass);
 	// 子項目を挿入出来るか？
 	virtual bool CanInsertChildItem() const;
-
+	// 指定した項目を削除する
+	virtual bool RemoveMenuItem(UDevMenuItemBase* RemoveItem);
 #endif
 
 public:

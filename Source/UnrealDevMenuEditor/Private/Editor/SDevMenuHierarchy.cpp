@@ -6,6 +6,8 @@
 #include "DevMenuHierarchyModel.h"
 #include "UnrealDevMenuEditor.h"
 
+#include "Framework/Commands/GenericCommands.h"
+
 #define LOCTEXT_NAMESPACE "SDevMenuHierarchyView"
 
 SDevMenuHierarchyView ::~SDevMenuHierarchyView()
@@ -35,6 +37,8 @@ void SDevMenuHierarchyView::Construct(const FArguments&                InArgs,
 	FilterHandler->SetGetChildrenDelegate(
 	    TreeFilterHandler<FTreeViewItem>::FOnGetChildren::CreateRaw(
 	        this, &SDevMenuHierarchyView::OnGetChildren));
+
+	CommandList = MakeShareable(new FUICommandList);
 
 	// clang-format off
     ChildSlot
@@ -84,7 +88,7 @@ void SDevMenuHierarchyView::Tick(const FGeometry& AllottedGeometry,
 		}
 		RefreshTreeView();
 
-        UpdateExpansionRecursive();
+		UpdateExpansionRecursive();
 
 		bRebuildTreeRequested = false;
 		bRefreshTreeRequested = false;
@@ -130,6 +134,7 @@ void SDevMenuHierarchyView::ReBuildTreeView()
 	        .OnSelectionChanged(this, &SDevMenuHierarchyView::OnSelectionChanged)
 	        .OnSetExpansionRecursive(this,
 	                                 &SDevMenuHierarchyView::OnSetExpansionRecursive)
+	        .OnContextMenuOpening(this, &SDevMenuHierarchyView::OnContextMenuOpening)
 	        .TreeItemsSource(&TreeRootMenus);
 
 	FilterHandler->SetTreeView(MenuTreeView.Get());
@@ -166,6 +171,26 @@ void SDevMenuHierarchyView::OnSelectionChanged(FTreeViewItem     SelectedItem,
 	}
 }
 
+// メニューコンテキスト対応
+TSharedPtr<SWidget> SDevMenuHierarchyView::OnContextMenuOpening()
+{
+	FMenuBuilder MenuBuilder(true, CommandList);
+
+	MenuBuilder.PushCommandList(Editor.Pin()->GetHierarchyCommandList());
+
+	MenuBuilder.BeginSection("Edit", LOCTEXT("Edit", "Edit"));
+	{
+		//MenuBuilder.AddMenuEntry(FGenericCommands::Get().Cut);
+		//MenuBuilder.AddMenuEntry(FGenericCommands::Get().Copy);
+		//MenuBuilder.AddMenuEntry(FGenericCommands::Get().Paste);
+		//MenuBuilder.AddMenuEntry(FGenericCommands::Get().Duplicate);
+		MenuBuilder.AddMenuEntry(FGenericCommands::Get().Delete);
+	}
+	MenuBuilder.EndSection();
+
+	return MenuBuilder.MakeWidget();
+}
+
 // 展開状態が設定された時
 void SDevMenuHierarchyView::OnSetExpansionRecursive(FTreeViewItem Item,
                                                     bool          bInExpansionState)
@@ -194,8 +219,8 @@ void SDevMenuHierarchyView::UpdateExpansionRecursive(const FTreeViewItem& Item)
 	// メニュー側に現在の展開状態を設定する
 	MenuTreeView->SetItemExpansion(Item, Item->IsExpansion());
 
-    // 小階層の展開状態を再起ループで設定する
-	TArray < FTreeViewItem > Children;
+	// 小階層の展開状態を再起ループで設定する
+	TArray<FTreeViewItem> Children;
 	Item->GatherChildren(Children);
 
 	for ( auto& ChildModel : Children )
@@ -206,7 +231,7 @@ void SDevMenuHierarchyView::UpdateExpansionRecursive(const FTreeViewItem& Item)
 
 void SDevMenuHierarchyView::OnSearchChanged(const FText& InFilterText)
 {
-	bRefreshTreeRequested            = true;
+	bRefreshTreeRequested        = true;
 	const bool bFilteringEnabled = !InFilterText.IsEmpty();
 	if ( bFilteringEnabled != FilterHandler->GetIsEnabled() )
 	{

@@ -60,6 +60,10 @@ private:
 	void OnGetChildren(FTreeViewItem InParent, TArray<FTreeViewItem>& OutChildren);
 	void OnSelectionChanged(FTreeViewItem     SelectedItem,
 	                        ESelectInfo::Type SelectInfo);
+
+    // メニューコンテキスト対応
+	TSharedPtr<SWidget> OnContextMenuOpening();
+
 	// 展開状態が設定された時
 	void OnSetExpansionRecursive(FTreeViewItem Item, bool bInExpansionState);
 	void GetFilterStrings(FTreeViewItem Item, TArray<FString>& OutString);
@@ -73,7 +77,10 @@ private:
 	TArray<FTreeViewItem> TreeRootMenus;
 
 private:
-	TWeakPtr<FUnrealDevMenuEditor>               Editor;
+	// エディター
+	TWeakPtr<FUnrealDevMenuEditor> Editor;
+	// コマンド
+	TSharedPtr<FUICommandList>                   CommandList;
 	TSharedPtr<SSearchBox>                       SearchBox;
 	TSharedPtr<FMenuTextFilter>                  SearchBoxMenuFilter;
 	TSharedPtr<SBorder>                          TreeViewArea;

@@ -179,6 +179,31 @@ bool UDevMenu::AddNewMenuItem(UClass* NewClass)
 	return false;
 }
 
+// 指定した項目を削除する
+bool UDevMenu::RemoveMenuItem(UDevMenuItemBase* RemoveItem)
+{
+	if ( Items.Contains(RemoveItem) )
+	{
+		Items.Remove(RemoveItem);
+		// Root項目で削除が行われた
+		// 変更扱いにする
+		SetFlags(RF_Transactional);
+		Modify();
+		return true;
+	}
+	for ( auto Item : Items )
+	{
+		if ( Item->RemoveMenuItem(RemoveItem) )
+		{
+			// 変更扱いにする
+			SetFlags(RF_Transactional);
+			Modify();
+			return true;
+		}
+	}
+	return false;
+}
+
 #endif
 
 #undef LOCTEXT_NAMESPACE

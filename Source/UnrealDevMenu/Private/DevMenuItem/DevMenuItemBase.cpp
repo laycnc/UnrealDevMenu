@@ -63,4 +63,11 @@ bool UDevMenuItemBase::CanInsertChildItem() const
 	return false;
 }
 
+// 指定した項目を削除する
+bool UDevMenuItemBase::RemoveMenuItem(UDevMenuItemBase* RemoveItem)
+{
+	static_cast<void>(RemoveItem);
+	return false;
+}
+
 #endif

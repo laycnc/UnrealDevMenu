@@ -31,7 +31,8 @@ public:
 	virtual bool AddNewMenuItem(UClass* NewClass) override;
 	// 子項目を挿入出来るか？
 	virtual bool CanInsertChildItem() const override;
-
+	// 指定した項目を削除する
+	virtual bool RemoveMenuItem(UDevMenuItemBase* RemoveItem) override;
 #endif
 
 

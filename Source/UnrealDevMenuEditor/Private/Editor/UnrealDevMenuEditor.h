@@ -79,9 +79,11 @@ public:
 		return DevMenuEdited;
 	}
 
-    DECLARE_MULTICAST_DELEGATE(FOnChangedMenu);
+	TSharedRef<FUICommandList> GetHierarchyCommandList() const;
 
-    // メニューが更新された
+	DECLARE_MULTICAST_DELEGATE(FOnChangedMenu);
+
+	// メニューが更新された
 	FOnChangedMenu OnChangedMenu;
 
 public:
@@ -92,6 +94,17 @@ public:
 private:
 	void GeneratedMenuItemClasses();
 
+	//////////////////////////////////////////////////////////////////////////
+	// Commands
+
+	// コマンドの初期化
+	void InitializeCommands();
+
+	// 選択した項目を削除
+	void DeleteSelectItem();
+    // 選択した項目を削除出来るか？
+	bool CanDeleteSelectItem() const;
+
 private:
 	UDevMenu* DevMenuEdited = nullptr;
 
@@ -99,4 +112,7 @@ private:
 	TSharedPtr<IDetailsView> DetailsView;
 	// メニューアイテム
 	TArray<TSharedPtr<FDevMenuItemViewModel>> MenuItemClasses;
+
+    // Hierarchyのコマンドリスト
+	TSharedPtr<FUICommandList> HierarchyCommandList;
 };

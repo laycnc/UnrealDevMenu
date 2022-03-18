@@ -77,7 +77,11 @@ FDevMenuHierarchyItem::FDevMenuHierarchyItem(UDevMenuItemBase* InItem)
 
 FText FDevMenuHierarchyItem::GetMenuName() const
 {
-	return FText::FromString(HostItem->GetName());
+	if ( HostItem.IsValid() )
+	{
+		return FText::FromString(HostItem->GetName());
+	}
+	return FText::GetEmpty();
 }
 
 UObject* FDevMenuHierarchyItem::GetObject() const

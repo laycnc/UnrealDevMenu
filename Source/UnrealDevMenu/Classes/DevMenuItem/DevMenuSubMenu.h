@@ -10,7 +10,7 @@ class UDevMenu;
 /**
  * 
  */
-UCLASS()
+UCLASS(Category = "Common")
 class UNREALDEVMENU_API UDevMenuSubMenu : public UDevMenuItemBase
 {
 	GENERATED_UCLASS_BODY()

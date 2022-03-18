@@ -40,7 +40,8 @@ public:
 
     // 新規メニュー項目を追加する
 	bool AddNewMenuItem(UClass* NewClass);
-
+    // 指定した項目を削除する
+	bool RemoveMenuItem(UDevMenuItemBase* RemoveItem);
 #endif
 
 public:

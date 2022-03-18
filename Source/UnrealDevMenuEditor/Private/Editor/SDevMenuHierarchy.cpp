@@ -95,6 +95,23 @@ void SDevMenuHierarchyView::Tick(const FGeometry& AllottedGeometry,
 	}
 }
 
+FReply SDevMenuHierarchyView::OnKeyDown(const FGeometry& MyGeometry,
+                                        const FKeyEvent& InKeyEvent)
+{
+	if ( Editor.Pin()->GetHierarchyCommandList()->ProcessCommandBindings(
+	         InKeyEvent) )
+	{
+		return FReply::Handled();
+	}
+
+	if ( CommandList->ProcessCommandBindings(InKeyEvent) )
+	{
+		return FReply::Handled();
+	}
+
+	return FReply::Unhandled();
+}
+
 // End SWidget
 
 // ツリービューをリフレッシュする

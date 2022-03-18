@@ -37,7 +37,7 @@ void UDevMenuItemBase::UpdateMenu(UDevMenuSubsystem&    InSubsystem,
 }
 
 // 子階層を取得する
-void UDevMenuItemBase::GetChildren(TArray<UDevMenuItemBase*>& OutChildren)
+void UDevMenuItemBase::GetChildren(TArray<UDevMenuItemBase*>& OutChildren) const
 {
 	(void)OutChildren;
 }
@@ -49,6 +49,13 @@ bool UDevMenuItemBase::HasTooltip() const
 }
 
 #if WITH_EDITOR
+
+// 新規メニュー項目を追加する
+bool UDevMenuItemBase::AddNewMenuItem(UClass* NewClass)
+{
+	static_cast<void>(NewClass);
+	return false;
+}
 
 // 子項目を挿入出来るか？
 bool UDevMenuItemBase::CanInsertChildItem() const

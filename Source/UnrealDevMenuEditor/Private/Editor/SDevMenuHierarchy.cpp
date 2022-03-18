@@ -10,7 +10,10 @@
 
 SDevMenuHierarchyView ::~SDevMenuHierarchyView()
 {
-	Editor.Pin()->OnChangedMenu.Remove(ChangedMenuHandle);
+	if ( Editor.IsValid() )
+	{
+		Editor.Pin()->OnChangedMenu.Remove(ChangedMenuHandle);
+	}
 }
 
 void SDevMenuHierarchyView::Construct(const FArguments&                InArgs,

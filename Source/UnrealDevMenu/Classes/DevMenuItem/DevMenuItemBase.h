@@ -27,7 +27,7 @@ public:
 	                        UDevMenuInstanceBase* InInstance) const;
 
 	// 子階層を取得する
-	virtual void GetChildren(TArray<UDevMenuItemBase*>& OutChildren);
+	virtual void GetChildren(TArray<UDevMenuItemBase*>& OutChildren) const;
 
 protected:
 	// メニューの説明が存在するか？
@@ -35,6 +35,8 @@ protected:
 
 #if WITH_EDITOR
 public:
+	// 新規メニュー項目を追加する
+	virtual bool AddNewMenuItem(UClass* NewClass);
 	// 子項目を挿入出来るか？
 	virtual bool CanInsertChildItem() const;
 

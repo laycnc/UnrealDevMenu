@@ -16,6 +16,9 @@ class UDevMenu;
 class UDevMenuItemBase;
 class FUnrealDevMenuEditor;
 
+/**
+ * デバッグメニューの生成用クラスモデル基底クラス
+ */
 class FDevMenuItemViewModel : public TSharedFromThis<FDevMenuItemViewModel>
 {
 public:
@@ -31,6 +34,9 @@ public:
 //////////////////////////////////////////////////////////////////////////
 // FDevMenuItemCategoryViewModel
 
+/**
+ * デバッグメニューの生成用クラスカテゴリモデル
+ */
 class FDevMenuItemCategoryViewModel : public FDevMenuItemViewModel
 {
 public:
@@ -52,6 +58,9 @@ protected:
 //////////////////////////////////////////////////////////////////////////
 // FDevMenuItemCategoryViewModel
 
+/**
+ * デバッグメニューの生成用クラスモデル
+ */
 class FDevMenuItemClassViewModel : public FDevMenuItemViewModel
 {
 public:

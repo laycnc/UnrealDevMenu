@@ -88,12 +88,19 @@ UObject* FDevMenuHierarchyItem::GetObject() const
 // 子項目を挿入出来るか？
 bool FDevMenuHierarchyItem::CanInsertChildItem() const
 {
+	if ( HostItem.IsValid() )
+	{
+		return HostItem->CanInsertChildItem();
+	}
 	return false;
 }
 
 bool FDevMenuHierarchyItem::AddNewMenuItem(UClass* NewClass) const
 {
-	static_cast<void>(NewClass);
+	if ( HostItem.IsValid() )
+	{
+		return HostItem->AddNewMenuItem(NewClass);
+	}
 	return false;
 }
 

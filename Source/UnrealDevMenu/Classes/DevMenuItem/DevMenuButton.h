@@ -8,17 +8,17 @@
 #include "DevMenuButton.generated.h"
 
 /**
- * 
+ * デバッグメニュー・ボタン
  */
-UCLASS()
+UCLASS(Category = "Input")
 class UDevMenuButton : public UDevMenuItemBase
 {
 	GENERATED_UCLASS_BODY()
 
 public:
 	// メニューの更新処理
-	virtual void UpdateMenu(UDevMenuSubsystem& InSubsystem,
-	                        UDevMenuInstanceBase*   InInstance) const override;
+	virtual void UpdateMenu(UDevMenuSubsystem&    InSubsystem,
+	                        UDevMenuInstanceBase* InInstance) const override;
 
 public:
 	// ボタンが押された時のコールバック

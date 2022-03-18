@@ -7,9 +7,9 @@
 #include "DevMenuLabel.generated.h"
 
 /**
- * 
+ * デバッグメニュー・ラベル
  */
-UCLASS()
+UCLASS(Category = "Common")
 class UDevMenuLabel : public UDevMenuItemBase
 {
 	GENERATED_UCLASS_BODY()

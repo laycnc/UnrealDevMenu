@@ -8,23 +8,35 @@ class UDevMenu;
 #include "DevMenuGroup.generated.h"
 
 /**
- * 
+ * デバッグメニュー・グループ
  */
-UCLASS()
+UCLASS(Category = "Common")
 class UNREALDEVMENU_API UDevMenuGroup : public UDevMenuItemBase
 {
 	GENERATED_UCLASS_BODY()
 
 public:
 	// 初期化
-	virtual void Initialize(UDevMenuSubsystem& InSubsystem,
-	                        UDevMenuInstanceBase*   InInstance) const override;
+	virtual void Initialize(UDevMenuSubsystem&    InSubsystem,
+	                        UDevMenuInstanceBase* InInstance) const override;
 	// メニューの更新処理
-	virtual void UpdateMenu(UDevMenuSubsystem& InSubsystem,
-	                        UDevMenuInstanceBase*   InInstance) const override;
+	virtual void UpdateMenu(UDevMenuSubsystem&    InSubsystem,
+	                        UDevMenuInstanceBase* InInstance) const override;
+	// 子階層を取得する
+	virtual void GetChildren(TArray<UDevMenuItemBase*>& OutChildren) const override;
+
+#if WITH_EDITOR
+public:
+	// 新規メニュー項目を追加する
+	virtual bool AddNewMenuItem(UClass* NewClass) override;
+	// 子項目を挿入出来るか？
+	virtual bool CanInsertChildItem() const override;
+
+#endif
+
 
 private:
-	// メニュー要素名
-	UPROPERTY(EditAnywhere)
-	TObjectPtr<UDevMenu> DevMenu;
+	// 子要素
+	UPROPERTY(EditDefaultsOnly, Instanced, AdvancedDisplay)
+	TArray<TObjectPtr<UDevMenuItemBase>> Items;
 };

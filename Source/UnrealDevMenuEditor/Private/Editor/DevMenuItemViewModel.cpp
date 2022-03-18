@@ -49,7 +49,6 @@ TSharedRef<ITableRow> FDevMenuItemCategoryViewModel::BuildRow(
 	    .Style(FEditorStyle::Get(), "UMGEditor.PaletteHeader")
         [
 			SNew(STextBlock)
-			.TransformPolicy(ETextTransformPolicy::ToUpper)
 			.Text(CategoryName)
 			.Font(FAppStyle::Get().GetFontStyle("SmallFontBold"))
         ];

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Input/Reply.h"
 #include "UObject/GCObject.h"
+#include "EditorUndoClient.h"
 #include "Framework/Docking/TabManager.h"
 #include "WorkflowOrientedApp/WorkflowCentricApplication.h"
 
@@ -27,6 +28,7 @@ struct FUnrealDevMenuEditorTabs
 
 class FUnrealDevMenuEditor
     : public FWorkflowCentricApplication
+    , public FEditorUndoClient
     , public FGCObject
     , public FNotifyHook
 {
@@ -60,6 +62,11 @@ public:
 	virtual FString      GetWorldCentricTabPrefix() const override;
 	//virtual FString      GetDocumentationLink() const override;
 	// End of FAssetEditorToolkit
+
+	// FEditorUndoClient interface
+	virtual void PostUndo(bool bSuccess) override;
+	virtual void PostRedo(bool bSuccess) override;
+	// End of FEditorUndoClient
 
 	// FGCObject interface
 	virtual void    AddReferencedObjects(FReferenceCollector& Collector) override;
@@ -102,7 +109,7 @@ private:
 
 	// 選択した項目を削除
 	void DeleteSelectItem();
-    // 選択した項目を削除出来るか？
+	// 選択した項目を削除出来るか？
 	bool CanDeleteSelectItem() const;
 
 private:
@@ -113,6 +120,6 @@ private:
 	// メニューアイテム
 	TArray<TSharedPtr<FDevMenuItemViewModel>> MenuItemClasses;
 
-    // Hierarchyのコマンドリスト
+	// Hierarchyのコマンドリスト
 	TSharedPtr<FUICommandList> HierarchyCommandList;
 };

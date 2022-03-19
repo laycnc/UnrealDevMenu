@@ -103,7 +103,12 @@ bool FDevMenuHierarchyItem::AddNewMenuItem(UClass* NewClass) const
 {
 	if ( HostItem.IsValid() )
 	{
-		return HostItem->AddNewMenuItem(NewClass);
+		FScopedTransaction Transaction(LOCTEXT("AddItem", "Add Item"));
+		if ( HostItem->AddNewMenuItem(NewClass) )
+		{
+			return true;
+		}
+		Transaction.Cancel();
 	}
 	return false;
 }
@@ -154,7 +159,12 @@ bool FDevMenuHierarchyRoot::AddNewMenuItem(UClass* NewClass) const
 {
 	if ( HostItem.IsValid() )
 	{
-		return HostItem->AddNewMenuItem(NewClass);
+		FScopedTransaction Transaction(LOCTEXT("AddItem", "Add Item"));
+		if ( HostItem->AddNewMenuItem(NewClass) )
+		{
+			return true;
+		}
+		Transaction.Cancel();
 	}
 	return false;
 }

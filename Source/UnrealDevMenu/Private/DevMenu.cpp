@@ -166,13 +166,15 @@ bool UDevMenu::AddNewMenuItem(UClass* NewClass)
 {
 	if ( NewClass )
 	{
+		Modify();
+
 		// 指定されたクラスで新規アイテムを生成して追加する
-		UDevMenuItemBase* NewItem = NewObject<UDevMenuItemBase>(this, NewClass);
+		UDevMenuItemBase* NewItem =
+		    NewObject<UDevMenuItemBase>(this, NewClass, NAME_None, RF_Transactional);
 		Items.Add(NewItem);
 
-		// 変更扱いにする
-		SetFlags(RF_Transactional);
-		Modify();
+		PostEditChange();
+		MarkPackageDirty();
 
 		return true;
 	}
@@ -187,8 +189,12 @@ bool UDevMenu::RemoveMenuItem(UDevMenuItemBase* RemoveItem)
 		Items.Remove(RemoveItem);
 		// Root項目で削除が行われた
 		// 変更扱いにする
-		SetFlags(RF_Transactional);
-		Modify();
+		//SetFlags(RF_Transactional);
+		//Modify();
+
+		PostEditChange();
+		MarkPackageDirty();
+
 		return true;
 	}
 	for ( auto Item : Items )

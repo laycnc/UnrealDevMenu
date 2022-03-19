@@ -64,9 +64,21 @@ void FUnrealDevMenuEditor::InitDevMenuEditor(
 	SetCurrentMode(DevMenuMode);
 }
 
-FUnrealDevMenuEditor::FUnrealDevMenuEditor() {}
+FUnrealDevMenuEditor::FUnrealDevMenuEditor()
+{
+	if ( UEditorEngine* Editor = Cast<UEditorEngine>(GEngine) )
+	{
+		Editor->RegisterForUndo(this);
+	}
+}
 
-FUnrealDevMenuEditor ::~FUnrealDevMenuEditor() {}
+FUnrealDevMenuEditor ::~FUnrealDevMenuEditor()
+{
+	if ( UEditorEngine* Editor = Cast<UEditorEngine>(GEngine) )
+	{
+		Editor->UnregisterForUndo(this);
+	}
+}
 
 // IToolkit interface
 void FUnrealDevMenuEditor::RegisterTabSpawners(
@@ -113,6 +125,23 @@ FString FUnrealDevMenuEditor::GetWorldCentricTabPrefix() const
 }
 
 // End of FAssetEditorToolkit
+
+// FEditorUndoClient interface
+void FUnrealDevMenuEditor::PostUndo(bool bSuccess)
+{
+	if ( bSuccess )
+	{
+		OnChangedMenu.Broadcast();
+	}
+}
+void FUnrealDevMenuEditor::PostRedo(bool bSuccess)
+{
+	if ( bSuccess )
+	{
+		OnChangedMenu.Broadcast();
+	}
+}
+// End of FEditorUndoClient
 
 // FGCObject interface
 void FUnrealDevMenuEditor::AddReferencedObjects(FReferenceCollector& Collector)
@@ -245,8 +274,9 @@ void FUnrealDevMenuEditor::InitializeCommands()
 // 選択した項目を削除
 void FUnrealDevMenuEditor::DeleteSelectItem()
 {
-	bool        bDeleteItem     = false;
-	const auto& SelectedObjects = DetailsView->GetSelectedObjects();
+	FScopedTransaction Transaction(LOCTEXT("DeleteItem", "Delete Item"));
+	bool               bDeleteItem     = false;
+	const auto&        SelectedObjects = DetailsView->GetSelectedObjects();
 	for ( const auto& Obj : SelectedObjects )
 	{
 		UDevMenuItemBase* Item = Cast<UDevMenuItemBase>(Obj.Get());
@@ -260,8 +290,12 @@ void FUnrealDevMenuEditor::DeleteSelectItem()
 	}
 	if ( bDeleteItem )
 	{
-        // 削除が行われたのでメニューをクリアする
+		// 削除が行われたのでメニューをクリアする
 		OnChangedMenu.Broadcast();
+	}
+	else
+	{
+		Transaction.Cancel();
 	}
 }
 

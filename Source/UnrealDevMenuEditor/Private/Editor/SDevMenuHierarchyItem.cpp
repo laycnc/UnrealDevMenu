@@ -76,11 +76,14 @@ TOptional<EItemDropZone> SDevMenuHierarchyViewItem::HandleCanAcceptDrop(
 		HierarchyDragDropOp->ResetToDefaultToolTip();
 
 		// メニュー作成テンプレートの場合
-		if ( Item->CanInsertChildItem() )
+		if ( const auto* MenuItem = Item->GetItemInterface() )
 		{
-			HierarchyDragDropOp->CurrentIconBrush =
-			    FEditorStyle::GetBrush(TEXT("Graph.ConnectorFeedback.OK"));
-			return EItemDropZone::OntoItem;
+			if ( MenuItem->CanInsertChildItem() )
+			{
+				HierarchyDragDropOp->CurrentIconBrush =
+				    FEditorStyle::GetBrush(TEXT("Graph.ConnectorFeedback.OK"));
+				return EItemDropZone::OntoItem;
+			}
 		}
 
 		// テンプレートを配置できない
@@ -112,26 +115,24 @@ TOptional<EItemDropZone> SDevMenuHierarchyViewItem::HandleCanAcceptDrop(
 			    FEditorStyle::GetBrush(TEXT("Graph.ConnectorFeedback.Error"));
 		}
 #else
-		UObject* Obj = Item->GetObject();
+		auto* MenuItem = Item->GetItemInterface();
 
 		switch ( DropZone )
 		{
+			case EItemDropZone::BelowItem:
 			case EItemDropZone::AboveItem:
 				HierarchyDragDropOp->CurrentIconBrush =
-				    FEditorStyle::GetBrush(TEXT("Graph.ConnectorFeedback.ShowNode"));
+				    FEditorStyle::GetBrush(TEXT("Graph.ConnectorFeedback.OK"));
+				return DropZone;
 				break;
 			case EItemDropZone::OntoItem:
-				if ( Item->CanInsertChildItem() )
+				if ( MenuItem->CanInsertChildItem() )
 				{
 					// 挿入可能なのでOK扱い
 					HierarchyDragDropOp->CurrentIconBrush =
 					    FEditorStyle::GetBrush(TEXT("Graph.ConnectorFeedback.OK"));
 					return EItemDropZone::OntoItem;
 				}
-				break;
-			case EItemDropZone::BelowItem:
-				HierarchyDragDropOp->CurrentIconBrush =
-				    FEditorStyle::GetBrush(TEXT("Graph.ConnectorFeedback.NewNode"));
 				break;
 			default:
 				break;
@@ -151,16 +152,24 @@ FReply SDevMenuHierarchyViewItem::HandleAcceptDrop(
     EItemDropZone         DropZone,
     FTreeViewItem         Item)
 {
+	auto* MenuItem = Item->GetItemInterface();
+	if ( MenuItem == nullptr )
+	{
+		return FReply::Unhandled();
+	}
+
 	if ( TSharedPtr<FMenuTemplateDragDropOp> HierarchyDragDropOp =
 	         DragDropEvent.GetOperationAs<FMenuTemplateDragDropOp>() )
 	{
 		UClass* GeneratedClass = HierarchyDragDropOp->ClassData.GetClass();
-		if ( Item->AddNewMenuItem(GeneratedClass) )
+		FScopedTransaction Transaction(LOCTEXT("AddItem", "Add Item"));
+		if ( !MenuItem->AddNewMenuItem(GeneratedClass) )
 		{
-			Editor.Pin()->OnChangedMenu.Broadcast();
-
-			return FReply::Handled();
+			Transaction.Cancel();
 		}
+
+		Editor.Pin()->OnChangedMenu.Broadcast();
+		return FReply::Handled();
 	}
 
 	if ( TSharedPtr<FMenuHierarchyDragDropOp> HierarchyDragDropOp =
@@ -168,13 +177,39 @@ FReply SDevMenuHierarchyViewItem::HandleAcceptDrop(
 	{
 		UDevMenu* DevMenu = Editor.Pin()->GetDevMenuEdited();
 		TArray<TWeakObjectPtr<UDevMenuItemBase>> Items = HierarchyDragDropOp->Items;
+
+		// 挿入するアイテムの所属する座標を取得する
+		int32 InsertIndex = MenuItem->GetPlacedIndex();
+
+		switch ( DropZone )
+		{
+			case EItemDropZone::AboveItem:
+				InsertIndex = InsertIndex;
+				break;
+			case EItemDropZone::BelowItem:
+				InsertIndex = InsertIndex + 1;
+				break;
+		}
+
 		for ( auto& WeakMoveItem : Items )
 		{
 			if ( WeakMoveItem.IsValid() )
 			{
 				UDevMenuItemBase* MoveItem = WeakMoveItem.Get();
 				DevMenu->RemoveMenuItem(MoveItem);
-				Item->InsertNewMenuItem(MoveItem, -1);
+				if ( EItemDropZone::OntoItem == DropZone )
+				{
+                    // 自身に挿入する場合にはそのまま挿入する
+					MenuItem->InsertNewMenuItem(MoveItem, INDEX_NONE);
+				}
+				else
+				{
+                    // 上下に挿入する場合には親のIndexに対して行う
+					if ( auto* ParentMenu = MenuItem->GetParentMenu() )
+					{
+						ParentMenu->InsertNewMenuItem(MoveItem, InsertIndex);
+					}
+				}
 			}
 		}
 		Editor.Pin()->OnChangedMenu.Broadcast();

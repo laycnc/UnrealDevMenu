@@ -2,6 +2,7 @@
 
 #include "DevMenuItem/DevMenuItemBase.h"
 #include "DevMenuSubsystem.h"
+#include "DevMenu.h"
 
 UDevMenuItemBase::UDevMenuItemBase(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
@@ -91,6 +92,29 @@ bool UDevMenuItemBase::RemoveMenuItem(UDevMenuItemBase* RemoveItem)
 {
 	static_cast<void>(RemoveItem);
 	return false;
+}
+
+// 親要素を取得する
+IDevMenuItemInterface* UDevMenuItemBase::GetParentMenu() const
+{
+	return Cast<IDevMenuItemInterface>(GetOuter());
+}
+
+// 所属している親Index
+int32 UDevMenuItemBase::GetPlacedIndex() const
+{
+	if ( IDevMenuItemInterface* MenuItemInterface = GetParentMenu() )
+	{
+		return MenuItemInterface->GetChildIndex(*this);
+	}
+
+	return INDEX_NONE;
+}
+
+// 所属しているIndex
+int32 UDevMenuItemBase::GetChildIndex(const UDevMenuItemBase& ChildItem) const
+{
+	return INDEX_NONE;
 }
 
 #endif

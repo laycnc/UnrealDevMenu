@@ -124,4 +124,10 @@ bool UDevMenuGroup::RemoveMenuItem(UDevMenuItemBase* RemoveItem)
 	return false;
 }
 
+// 所属しているIndex
+int32 UDevMenuGroup::GetChildIndex(const UDevMenuItemBase& ChildItem) const
+{
+	return Items.IndexOfByKey(&ChildItem);
+}
+
 #endif

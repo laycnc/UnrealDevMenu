@@ -13,6 +13,7 @@
 
 class UDevMenu;
 class UDevMenuItemBase;
+class IDevMenuItemInterface;
 class FUnrealDevMenuEditor;
 
 class FDevMenuHierarchyModel : public TSharedFromThis<FDevMenuHierarchyModel>
@@ -23,15 +24,12 @@ public:
 
 	void GatherChildren(TArray<TSharedPtr<FDevMenuHierarchyModel>>& Children);
 
-	void             GetFilterStrings(TArray<FString>& OutString) const;
-	virtual FText    GetMenuName() const;
-	virtual UObject* GetObject() const;
-	// 子項目を挿入出来るか？
-	virtual bool CanInsertChildItem() const;
-	// 新規メニュー項目を追加する
-	virtual bool AddNewMenuItem(UClass* NewClass) const;
-	// 新規メニュー項目を追加する
-	virtual void InsertNewMenuItem(UDevMenuItemBase* NewItem, int32 Index) const;
+	void                   GetFilterStrings(TArray<FString>& OutString) const;
+	virtual FText          GetMenuName() const;
+	virtual UObject*       GetObject() const;
+	IDevMenuItemInterface* GetItemInterface() const;
+	// ルートか？
+	virtual bool IsRootModel() const;
 	// 展開状態を設定する
 	virtual void SetExpansion(bool bNewExpanded);
 	// 展開状態か判定する
@@ -62,13 +60,8 @@ public:
 
 	virtual FText    GetMenuName() const override;
 	virtual UObject* GetObject() const override;
-	// 子項目を挿入出来るか？
-	virtual bool CanInsertChildItem() const override;
-	// 新規メニュー項目を追加する
-	virtual bool AddNewMenuItem(UClass* NewClass) const override;
-	// 新規メニュー項目を追加する
-	virtual void InsertNewMenuItem(UDevMenuItemBase* NewItem,
-	                               int32             Index) const override;
+	// ルートか？
+	virtual bool IsRootModel() const override;
 	virtual void GetChildren(
 	    TArray<TSharedPtr<FDevMenuHierarchyModel>>& Children) override;
 	// ドラッグを検出したときの処理
@@ -89,13 +82,8 @@ public:
 
 	virtual FText    GetMenuName() const override;
 	virtual UObject* GetObject() const override;
-	// 子項目を挿入出来るか？
-	virtual bool CanInsertChildItem() const override;
-	// 新規メニュー項目を追加する
-	virtual bool AddNewMenuItem(UClass* NewClass) const override;
-	// 新規メニュー項目を追加する
-	virtual void InsertNewMenuItem(UDevMenuItemBase* NewItem,
-	                               int32             Index) const override;
+	// ルートか？
+	virtual bool IsRootModel() const override;
 	virtual void GetChildren(
 	    TArray<TSharedPtr<FDevMenuHierarchyModel>>& Children) override;
 private:

@@ -1,6 +1,7 @@
 #include "DevMenuHierarchyModel.h"
 #include "DevMenu.h"
 #include "DevMenuItem/DevMenuItemBase.h"
+#include "DevMenuItemInterface.h"
 #include "DragDrop/MenuHierarchyDragDropOp.h"
 
 #define LOCTEXT_NAMESPACE "FDevMenuHierarchyModel"
@@ -38,24 +39,15 @@ UObject* FDevMenuHierarchyModel::GetObject() const
 	return nullptr;
 }
 
-bool FDevMenuHierarchyModel::CanInsertChildItem() const
+IDevMenuItemInterface* FDevMenuHierarchyModel::GetItemInterface() const
 {
-	return false;
+	return Cast<IDevMenuItemInterface>(GetObject());
 }
 
-// 新規メニュー項目を追加する
-bool FDevMenuHierarchyModel::AddNewMenuItem(UClass* NewClass) const
+// ルートか？
+bool FDevMenuHierarchyModel::IsRootModel() const
 {
-	static_cast<void>(NewClass);
 	return false;
-}
-
-// 新規メニュー項目を追加する
-void FDevMenuHierarchyModel::InsertNewMenuItem(UDevMenuItemBase* NewItem,
-                                               int32             Index) const
-{
-	static_cast<void>(NewItem);
-	static_cast<void>(Index);
 }
 
 // 展開状態を設定する
@@ -105,38 +97,10 @@ UObject* FDevMenuHierarchyItem::GetObject() const
 	return HostItem.Get();
 }
 
-// 子項目を挿入出来るか？
-bool FDevMenuHierarchyItem::CanInsertChildItem() const
+// ルートか？
+bool FDevMenuHierarchyItem::IsRootModel() const
 {
-	if ( HostItem.IsValid() )
-	{
-		return HostItem->CanInsertChildItem();
-	}
-	return false;
-}
-
-bool FDevMenuHierarchyItem::AddNewMenuItem(UClass* NewClass) const
-{
-	if ( HostItem.IsValid() )
-	{
-		FScopedTransaction Transaction(LOCTEXT("AddItem", "Add Item"));
-		if ( HostItem->AddNewMenuItem(NewClass) )
-		{
-			return true;
-		}
-		Transaction.Cancel();
-	}
-	return false;
-}
-
-// 新規メニュー項目を追加する
-void FDevMenuHierarchyItem::InsertNewMenuItem(UDevMenuItemBase* NewItem,
-                                              int32             Index) const
-{
-	if ( HostItem.IsValid() )
-	{
-		HostItem->InsertNewMenuItem(NewItem, Index);
-	}
+	return true;
 }
 
 void FDevMenuHierarchyItem::GetChildren(
@@ -190,36 +154,10 @@ UObject* FDevMenuHierarchyRoot::GetObject() const
 	return HostItem.Get();
 }
 
-// 子項目を挿入出来るか？
-bool FDevMenuHierarchyRoot::CanInsertChildItem() const
+// ルートか？
+bool FDevMenuHierarchyRoot::IsRootModel() const
 {
-	// Rootの下にはぶら下げられる
 	return true;
-}
-
-// 新規メニュー項目を追加する
-bool FDevMenuHierarchyRoot::AddNewMenuItem(UClass* NewClass) const
-{
-	if ( HostItem.IsValid() )
-	{
-		FScopedTransaction Transaction(LOCTEXT("AddItem", "Add Item"));
-		if ( HostItem->AddNewMenuItem(NewClass) )
-		{
-			return true;
-		}
-		Transaction.Cancel();
-	}
-	return false;
-}
-
-// 新規メニュー項目を追加する
-void FDevMenuHierarchyRoot::InsertNewMenuItem(UDevMenuItemBase* NewItem,
-                                              int32             Index) const
-{
-	if ( HostItem.IsValid() )
-	{
-		HostItem->InsertNewMenuItem(NewItem, Index);
-	}
 }
 
 void FDevMenuHierarchyRoot::GetChildren(

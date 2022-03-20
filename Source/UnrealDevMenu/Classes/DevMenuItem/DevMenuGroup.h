@@ -35,6 +35,8 @@ public:
 	virtual bool CanInsertChildItem() const override;
 	// 指定した項目を削除する
 	virtual bool RemoveMenuItem(UDevMenuItemBase* RemoveItem) override;
+	// 所属しているIndex
+	virtual int32 GetChildIndex(const UDevMenuItemBase& ChildItem) const override;
 #endif
 
 

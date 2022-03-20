@@ -200,6 +200,12 @@ void UDevMenu::InsertNewMenuItem(UDevMenuItemBase* NewItem, int32 Index)
 	MarkPackageDirty();
 }
 
+// 子項目を挿入出来るか？
+bool UDevMenu::CanInsertChildItem() const
+{
+	return true;
+}
+
 // 指定した項目を削除する
 bool UDevMenu::RemoveMenuItem(UDevMenuItemBase* RemoveItem)
 {
@@ -222,6 +228,24 @@ bool UDevMenu::RemoveMenuItem(UDevMenuItemBase* RemoveItem)
 		}
 	}
 	return false;
+}
+
+// 親要素を取得する
+IDevMenuItemInterface* UDevMenu::GetParentMenu() const
+{
+	return nullptr;
+}
+
+// 親の配列に自分が配置されているIndex
+int32 UDevMenu::GetPlacedIndex() const
+{
+	return INDEX_NONE;
+}
+
+// 指定した要素が配置されているIndex
+int32 UDevMenu::GetChildIndex(const UDevMenuItemBase& ChildItem) const
+{
+	return Items.IndexOfByKey(&ChildItem);
 }
 
 #endif

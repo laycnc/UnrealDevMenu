@@ -17,11 +17,17 @@ class UDevMenuButton : public UDevMenuItemBase
 
 public:
 	// メニューの更新処理
-	virtual void UpdateMenu(UDevMenuSubsystem&    InSubsystem,
-	                        UDevMenuInstanceBase* InInstance) const override;
+	virtual void UpdateMenu(UDevMenuSubsystem& InSubsystem) const override;
 
 public:
+    // ボタンラ名
+	UPROPERTY(EditAnywhere, Category = "DevMenu")
+	FText Label;
+	// メニューの説明
+	UPROPERTY(EditAnywhere, Category = "DevMenu")
+	FText Tooltip;
+
 	// ボタンが押された時のコールバック
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "DevMenu")
 	FDevMenuBinding Callback;
 };

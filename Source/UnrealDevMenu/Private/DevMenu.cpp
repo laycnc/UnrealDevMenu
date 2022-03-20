@@ -27,7 +27,7 @@ void UDevMenu::GeneratedInstance(UDevMenuSubsystem& Subsystem) const
 	{
 		if ( Item )
 		{
-			Item->GeneratedInstance(Subsystem);
+			Item->Initialize(Subsystem);
 		}
 	}
 }
@@ -40,8 +40,7 @@ void UDevMenu::UpdateMenu(UDevMenuSubsystem& InSubsystem) const
 	{
 		if ( Item )
 		{
-			UDevMenuInstanceBase* Instance = InSubsystem.FindInstance(Item->Id);
-			Item->UpdateMenu(InSubsystem, Instance);
+			Item->UpdateMenu(InSubsystem);
 		}
 	}
 }

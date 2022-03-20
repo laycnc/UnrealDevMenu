@@ -10,24 +10,24 @@ UDevMenuGroup::UDevMenuGroup(const FObjectInitializer& ObjectInitializer)
 }
 
 // 初期化
-void UDevMenuGroup::Initialize(UDevMenuSubsystem&    InSubsystem,
-                               UDevMenuInstanceBase* InInstance) const
+void UDevMenuGroup::Initialize(UDevMenuSubsystem& InSubsystem) const
 {
 	// 子要素のインスタンスを作成する
 	for ( auto Item : Items )
 	{
 		if ( Item )
 		{
-			Item->GeneratedInstance(InSubsystem);
+			Item->Initialize(InSubsystem);
 		}
 	}
 }
 
 // メニューの更新処理
-void UDevMenuGroup::UpdateMenu(UDevMenuSubsystem&    InSubsystem,
-                               UDevMenuInstanceBase* InInstance) const
+void UDevMenuGroup::UpdateMenu(UDevMenuSubsystem& InSubsystem) const
 {
 #if WITH_IMGUI
+
+
 	if ( ImGui::BeginMenu(TCHAR_TO_UTF8(*Id.ToString())) )
 	{
 		// 子要素のインスタンスを作成する
@@ -35,8 +35,7 @@ void UDevMenuGroup::UpdateMenu(UDevMenuSubsystem&    InSubsystem,
 		{
 			if ( Item )
 			{
-				UDevMenuInstanceBase* Instance = InSubsystem.FindInstance(Item->Id);
-				Item->UpdateMenu(InSubsystem, Instance);
+				Item->UpdateMenu(InSubsystem);
 			}
 		}
 

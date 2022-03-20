@@ -10,11 +10,10 @@ UDevMenuButton::UDevMenuButton(const FObjectInitializer& ObjectInitializer)
 }
 
 // メニューの更新処理
-void UDevMenuButton::UpdateMenu(UDevMenuSubsystem& InSubsystem,
-                                UDevMenuInstanceBase*   InInstance) const
+void UDevMenuButton::UpdateMenu(UDevMenuSubsystem& InSubsystem) const
 {
 	// ラベルを表示する
-	if ( ImGui::Button(TCHAR_TO_UTF8(*Id.ToString())) )
+	if ( ImGui::Button(TCHAR_TO_UTF8(*Label.ToString())) )
 	{
 		struct FArgs
 		{
@@ -31,7 +30,7 @@ void UDevMenuButton::UpdateMenu(UDevMenuSubsystem& InSubsystem,
 	if ( ImGui::IsItemHovered() )
 	{
 		// ホバー中なのでツールチップを表示する
-		if ( HasTooltip() )
+		if ( !Tooltip.IsEmpty() )
 		{
 			ImGui::SetTooltip(TCHAR_TO_UTF8(*Tooltip.ToString()));
 		}

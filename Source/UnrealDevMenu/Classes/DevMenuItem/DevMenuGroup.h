@@ -17,11 +17,9 @@ class UNREALDEVMENU_API UDevMenuGroup : public UDevMenuItemBase
 
 public:
 	// 初期化
-	virtual void Initialize(UDevMenuSubsystem&    InSubsystem,
-	                        UDevMenuInstanceBase* InInstance) const override;
+	virtual void Initialize(UDevMenuSubsystem& InSubsystem) const override;
 	// メニューの更新処理
-	virtual void UpdateMenu(UDevMenuSubsystem&    InSubsystem,
-	                        UDevMenuInstanceBase* InInstance) const override;
+	virtual void UpdateMenu(UDevMenuSubsystem& InSubsystem) const override;
 	// 子階層を取得する
 	virtual void GetChildren(TArray<UDevMenuItemBase*>& OutChildren) const override;
 
@@ -41,7 +39,13 @@ public:
 
 
 public:
+	// メニューの項目名
+	UPROPERTY(EditAnywhere, Category = "DevMenu")
+	FText Id;
+	// メニューの説明
+	UPROPERTY(EditAnywhere, Category = "DevMenu")
+	FText Tooltip;
 	// 子要素
-	UPROPERTY(EditDefaultsOnly, Instanced, AdvancedDisplay)
+	UPROPERTY(EditDefaultsOnly, Instanced, AdvancedDisplay, Category = "DevMenu")
 	TArray<TObjectPtr<UDevMenuItemBase>> Items;
 };

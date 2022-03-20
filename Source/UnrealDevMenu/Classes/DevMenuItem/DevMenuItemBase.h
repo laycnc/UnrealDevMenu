@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "DevMenuItemInterface.h"
-class UDevMenuInstanceBase;
 class UDevMenuSubsystem;
 #include "DevMenuItemBase.generated.h"
 
@@ -20,21 +19,15 @@ class UNREALDEVMENU_API UDevMenuItemBase
 	GENERATED_UCLASS_BODY()
 
 public:
-	// 実行用のインスタンスを作成する
-	void GeneratedInstance(UDevMenuSubsystem& InSubsystem) const;
 	// 初期化
-	virtual void Initialize(UDevMenuSubsystem&    InSubsystem,
-	                        UDevMenuInstanceBase* InInstance) const;
+	virtual void Initialize(UDevMenuSubsystem& InSubsystem) const;
 	// メニューの更新処理
-	virtual void UpdateMenu(UDevMenuSubsystem&    InSubsystem,
-	                        UDevMenuInstanceBase* InInstance) const;
+	virtual void UpdateMenu(UDevMenuSubsystem& InSubsystem) const;
 
 	// 子階層を取得する
 	virtual void GetChildren(TArray<UDevMenuItemBase*>& OutChildren) const;
 
 protected:
-	// メニューの説明が存在するか？
-	bool HasTooltip() const;
 	// ルートメニューを取得
 	UDevMenu* GetRootMenu() const;
 
@@ -56,20 +49,4 @@ public:
 	virtual int32 GetChildIndex(const UDevMenuItemBase& ChildItem) const;
 
 #endif
-
-public:
-	// インスタンスクラス
-	UPROPERTY()
-	TSubclassOf<UDevMenuInstanceBase> InstanceClass;
-	// メニュー要素名
-	UPROPERTY(EditAnywhere)
-	FName Id;
-
-	// メニューの項目名
-	UPROPERTY(EditAnywhere)
-	FText Label;
-
-	// メニューの説明
-	UPROPERTY(EditAnywhere)
-	FText Tooltip;
 };

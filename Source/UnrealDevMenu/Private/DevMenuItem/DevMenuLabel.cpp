@@ -9,8 +9,7 @@ UDevMenuLabel::UDevMenuLabel(const FObjectInitializer& ObjectInitializer)
 }
 
 // メニューの更新処理
-void UDevMenuLabel::UpdateMenu(UDevMenuSubsystem& InSubsystem,
-                               UDevMenuInstanceBase*   InInstance) const
+void UDevMenuLabel::UpdateMenu(UDevMenuSubsystem& InSubsystem) const
 {
 	// ラベルを表示する
 	ImGui::LabelText(TCHAR_TO_UTF8(*Id.ToString()),
@@ -19,7 +18,7 @@ void UDevMenuLabel::UpdateMenu(UDevMenuSubsystem& InSubsystem,
 	if ( ImGui::IsItemHovered() )
 	{
 		// ホバー中なのでツールチップを表示する
-		if ( HasTooltip() )
+		if ( !Tooltip.IsEmpty() )
 		{
 			ImGui::SetTooltip(TCHAR_TO_UTF8(*Tooltip.ToString()));
 		}

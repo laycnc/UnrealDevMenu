@@ -2,6 +2,7 @@
 
 #include "DevMenuItem/DevMenuSubMenu.h"
 #include "DevMenuSubsystem.h"
+#include "DevMenu.h"
 
 UDevMenuSubMenu::UDevMenuSubMenu(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
@@ -9,8 +10,7 @@ UDevMenuSubMenu::UDevMenuSubMenu(const FObjectInitializer& ObjectInitializer)
 }
 
 // 初期化
-void UDevMenuSubMenu::Initialize(UDevMenuSubsystem&    InSubsystem,
-                                 UDevMenuInstanceBase* InInstance) const
+void UDevMenuSubMenu::Initialize(UDevMenuSubsystem& InSubsystem) const
 {
 	if ( DevMenu == GetOuter() )
 	{
@@ -24,8 +24,7 @@ void UDevMenuSubMenu::Initialize(UDevMenuSubsystem&    InSubsystem,
 }
 
 // メニューの更新処理
-void UDevMenuSubMenu::UpdateMenu(UDevMenuSubsystem&    InSubsystem,
-                                 UDevMenuInstanceBase* InInstance) const
+void UDevMenuSubMenu::UpdateMenu(UDevMenuSubsystem& InSubsystem) const
 {
 	if ( DevMenu == GetOuter() )
 	{

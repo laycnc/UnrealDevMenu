@@ -9,33 +9,31 @@ UDevMenuSliderInt::UDevMenuSliderInt(const FObjectInitializer& ObjectInitializer
 }
 
 // 初期化
-void UDevMenuSliderInt::Initialize(UDevMenuSubsystem& InSubsystem,
-                                   UDevMenuInstanceBase*   InInstance) const
+void UDevMenuSliderInt::Initialize(UDevMenuSubsystem& InSubsystem) const
 {
 	// 初期値を生成する
-	InSubsystem.SetVariable(Id, DefaultValue);
+	//InSubsystem.SetVariable(Id, DefaultValue);
 }
 
 // メニューの更新処理
-void UDevMenuSliderInt::UpdateMenu(UDevMenuSubsystem& InSubsystem,
-                                   UDevMenuInstanceBase*   InInstance) const
+void UDevMenuSliderInt::UpdateMenu(UDevMenuSubsystem& InSubsystem) const
 {
 	int32 TargetValue = 0;
-	if ( !InSubsystem.GetVariable(Id, TargetValue) )
-	{
-		return;
-	}
+	//if ( !InSubsystem.GetVariable(Id, TargetValue) )
+	//{
+	//	return;
+	//}
 
 	if ( ImGui::SliderInt(
 	         TCHAR_TO_UTF8(*Label.ToString()), &TargetValue, MinValue, MaxValue) )
 	{
-		InSubsystem.SetVariable(Id, TargetValue);
+		//InSubsystem.SetVariable(Id, TargetValue);
 	}
 
 	if ( ImGui::IsItemHovered() )
 	{
 		// ホバー中なのでツールチップを表示する
-		if ( HasTooltip() )
+		if ( !Tooltip.IsEmpty() )
 		{
 			ImGui::SetTooltip(TCHAR_TO_UTF8(*Tooltip.ToString()));
 		}

@@ -16,20 +16,25 @@ class UDevMenuSliderInt : public UDevMenuItemBase
 
 public:
 	// 初期化
-	virtual void Initialize(UDevMenuSubsystem& InSubsystem,
-	                        UDevMenuInstanceBase*   InInstance) const override;
+	virtual void Initialize(UDevMenuSubsystem& InSubsystem) const override;
 	// メニューの更新処理
-	virtual void UpdateMenu(UDevMenuSubsystem& InSubsystem,
-	                        UDevMenuInstanceBase*   InInstance) const override;
+	virtual void UpdateMenu(UDevMenuSubsystem& InSubsystem) const override;
 
 public:
+	// スライダー名
+	UPROPERTY(EditAnywhere, Category = "DevMenu")
+	FText Label;
+	// 説明
+	UPROPERTY(EditAnywhere, Category = "DevMenu")
+	FText Tooltip;
+
 	// デフォルト値
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "DevMenu")
 	int32 DefaultValue;
 	// スライダーの最小値
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "DevMenu")
 	int32 MinValue;
 	// スライダーの最大値
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "DevMenu")
 	int32 MaxValue;
 };

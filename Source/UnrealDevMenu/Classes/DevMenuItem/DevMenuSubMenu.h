@@ -17,11 +17,9 @@ class UNREALDEVMENU_API UDevMenuSubMenu : public UDevMenuItemBase
 
 public:
 	// 初期化
-	virtual void Initialize(UDevMenuSubsystem&    InSubsystem,
-	                        UDevMenuInstanceBase* InInstance) const override;
+	virtual void Initialize(UDevMenuSubsystem& InSubsystem) const override;
 	// メニューの更新処理
-	virtual void UpdateMenu(UDevMenuSubsystem&    InSubsystem,
-	                        UDevMenuInstanceBase* InInstance) const override;
+	virtual void UpdateMenu(UDevMenuSubsystem& InSubsystem) const override;
 
 private:
 	// メニュー要素名

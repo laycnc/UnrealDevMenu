@@ -48,6 +48,22 @@ bool UDevMenuItemBase::HasTooltip() const
 	return !Tooltip.IsEmpty();
 }
 
+// ルートメニューを取得
+UDevMenu* UDevMenuItemBase::GetRootMenu() const
+{
+	UObject* Outer = GetOuter();
+	while ( Outer )
+	{
+		if ( UDevMenu* DevMenu = Cast<UDevMenu>(Outer) )
+		{
+			return DevMenu;
+		}
+		Outer = Outer->GetOuter();
+	}
+
+	return nullptr;
+}
+
 #if WITH_EDITOR
 
 // 新規メニュー項目を追加する
@@ -55,6 +71,13 @@ bool UDevMenuItemBase::AddNewMenuItem(UClass* NewClass)
 {
 	static_cast<void>(NewClass);
 	return false;
+}
+
+// 新規メニュー項目を追加する
+void UDevMenuItemBase::InsertNewMenuItem(UDevMenuItemBase* NewItem, int32 Index)
+{
+	static_cast<void>(NewItem);
+	static_cast<void>(Index);
 }
 
 // 子項目を挿入出来るか？

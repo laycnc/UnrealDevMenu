@@ -1,6 +1,7 @@
 #include "DevMenuHierarchyModel.h"
 #include "DevMenu.h"
 #include "DevMenuItem/DevMenuItemBase.h"
+#include "DragDrop/MenuHierarchyDragDropOp.h"
 
 #define LOCTEXT_NAMESPACE "FDevMenuHierarchyModel"
 
@@ -49,6 +50,14 @@ bool FDevMenuHierarchyModel::AddNewMenuItem(UClass* NewClass) const
 	return false;
 }
 
+// 新規メニュー項目を追加する
+void FDevMenuHierarchyModel::InsertNewMenuItem(UDevMenuItemBase* NewItem,
+                                               int32             Index) const
+{
+	static_cast<void>(NewItem);
+	static_cast<void>(Index);
+}
+
 // 展開状態を設定する
 void FDevMenuHierarchyModel::SetExpansion(bool bNewExpanded)
 {
@@ -59,6 +68,13 @@ void FDevMenuHierarchyModel::SetExpansion(bool bNewExpanded)
 bool FDevMenuHierarchyModel::IsExpansion() const
 {
 	return bIsExpanded;
+}
+
+// ドラッグを検出したときの処理
+FReply FDevMenuHierarchyModel::HandleDragDetected(const FGeometry&     MyGeometry,
+                                                  const FPointerEvent& MouseEvent)
+{
+	return FReply::Unhandled();
 }
 
 void FDevMenuHierarchyModel::GetChildren(
@@ -113,6 +129,16 @@ bool FDevMenuHierarchyItem::AddNewMenuItem(UClass* NewClass) const
 	return false;
 }
 
+// 新規メニュー項目を追加する
+void FDevMenuHierarchyItem::InsertNewMenuItem(UDevMenuItemBase* NewItem,
+                                              int32             Index) const
+{
+	if ( HostItem.IsValid() )
+	{
+		HostItem->InsertNewMenuItem(NewItem, Index);
+	}
+}
+
 void FDevMenuHierarchyItem::GetChildren(
     TArray<TSharedPtr<FDevMenuHierarchyModel>>& Children)
 {
@@ -126,6 +152,23 @@ void FDevMenuHierarchyItem::GetChildren(
 			Children.Add(MakeShareable(new FDevMenuHierarchyItem(Item)));
 		}
 	}
+}
+
+// ドラッグを検出したときの処理
+FReply FDevMenuHierarchyItem::HandleDragDetected(const FGeometry&     MyGeometry,
+                                                 const FPointerEvent& MouseEvent)
+{
+	if ( HostItem.IsValid() )
+	{
+		TArray<TWeakObjectPtr<UDevMenuItemBase>> SelectItems;
+
+		SelectItems.Add(HostItem);
+
+		return FReply::Handled().BeginDragDrop(
+		    FMenuHierarchyDragDropOp::New(SelectItems));
+	}
+
+	return FReply::Unhandled();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -167,6 +210,16 @@ bool FDevMenuHierarchyRoot::AddNewMenuItem(UClass* NewClass) const
 		Transaction.Cancel();
 	}
 	return false;
+}
+
+// 新規メニュー項目を追加する
+void FDevMenuHierarchyRoot::InsertNewMenuItem(UDevMenuItemBase* NewItem,
+                                              int32             Index) const
+{
+	if ( HostItem.IsValid() )
+	{
+		HostItem->InsertNewMenuItem(NewItem, Index);
+	}
 }
 
 void FDevMenuHierarchyRoot::GetChildren(

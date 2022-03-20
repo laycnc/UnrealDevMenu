@@ -32,11 +32,15 @@ public:
 protected:
 	// メニューの説明が存在するか？
 	bool HasTooltip() const;
+	// ルートメニューを取得
+	UDevMenu* GetRootMenu() const;
 
 #if WITH_EDITOR
 public:
 	// 新規メニュー項目を追加する
 	virtual bool AddNewMenuItem(UClass* NewClass);
+	// 新規メニュー項目を追加する
+	virtual void InsertNewMenuItem(UDevMenuItemBase* NewItem, int32 Index);
 	// 子項目を挿入出来るか？
 	virtual bool CanInsertChildItem() const;
 	// 指定した項目を削除する

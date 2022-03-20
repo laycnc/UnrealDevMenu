@@ -181,16 +181,33 @@ bool UDevMenu::AddNewMenuItem(UClass* NewClass)
 	return false;
 }
 
+// 新規メニュー項目を追加する
+void UDevMenu::InsertNewMenuItem(UDevMenuItemBase* NewItem, int32 Index)
+{
+	Modify();
+
+	if ( Index == INDEX_NONE )
+	{
+		Items.Add(NewItem);
+	}
+	else
+	{
+		Items.Insert(NewItem, Index);
+	}
+	NewItem->Rename(nullptr, this);
+
+	PostEditChange();
+	MarkPackageDirty();
+}
+
 // 指定した項目を削除する
 bool UDevMenu::RemoveMenuItem(UDevMenuItemBase* RemoveItem)
 {
 	if ( Items.Contains(RemoveItem) )
 	{
+		Modify();
+
 		Items.Remove(RemoveItem);
-		// Root項目で削除が行われた
-		// 変更扱いにする
-		//SetFlags(RF_Transactional);
-		//Modify();
 
 		PostEditChange();
 		MarkPackageDirty();
@@ -201,9 +218,6 @@ bool UDevMenu::RemoveMenuItem(UDevMenuItemBase* RemoveItem)
 	{
 		if ( Item->RemoveMenuItem(RemoveItem) )
 		{
-			// 変更扱いにする
-			SetFlags(RF_Transactional);
-			Modify();
 			return true;
 		}
 	}

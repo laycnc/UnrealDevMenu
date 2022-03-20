@@ -29,6 +29,8 @@ public:
 public:
 	// 新規メニュー項目を追加する
 	virtual bool AddNewMenuItem(UClass* NewClass) override;
+	// 新規メニュー項目を追加する
+	virtual void InsertNewMenuItem(UDevMenuItemBase* NewItem, int32 Index) override;
 	// 子項目を挿入出来るか？
 	virtual bool CanInsertChildItem() const override;
 	// 指定した項目を削除する
@@ -36,7 +38,7 @@ public:
 #endif
 
 
-private:
+public:
 	// 子要素
 	UPROPERTY(EditDefaultsOnly, Instanced, AdvancedDisplay)
 	TArray<TObjectPtr<UDevMenuItemBase>> Items;

@@ -30,19 +30,25 @@ public:
 	virtual bool CanInsertChildItem() const;
 	// 新規メニュー項目を追加する
 	virtual bool AddNewMenuItem(UClass* NewClass) const;
+	// 新規メニュー項目を追加する
+	virtual void InsertNewMenuItem(UDevMenuItemBase* NewItem, int32 Index) const;
 	// 展開状態を設定する
 	virtual void SetExpansion(bool bNewExpanded);
 	// 展開状態か判定する
 	virtual bool IsExpansion() const;
+	// ドラッグを検出したときの処理
+	virtual FReply HandleDragDetected(const FGeometry&     MyGeometry,
+	                                  const FPointerEvent& MouseEvent);
+
 
 protected:
 	virtual void GetChildren(TArray<TSharedPtr<FDevMenuHierarchyModel>>& Children);
 private:
-    // 小階層
+	// 小階層
 	TArray<TSharedPtr<FDevMenuHierarchyModel>> ChildrenModels;
-    // 小階層を作成したか？
+	// 小階層を作成したか？
 	bool bInitializeChildren = false;
-    // 展開状態
+	// 展開状態
 	bool bIsExpanded = true;
 };
 
@@ -60,8 +66,14 @@ public:
 	virtual bool CanInsertChildItem() const override;
 	// 新規メニュー項目を追加する
 	virtual bool AddNewMenuItem(UClass* NewClass) const override;
+	// 新規メニュー項目を追加する
+	virtual void InsertNewMenuItem(UDevMenuItemBase* NewItem,
+	                               int32             Index) const override;
 	virtual void GetChildren(
 	    TArray<TSharedPtr<FDevMenuHierarchyModel>>& Children) override;
+	// ドラッグを検出したときの処理
+	virtual FReply HandleDragDetected(const FGeometry&     MyGeometry,
+	                                  const FPointerEvent& MouseEvent) override;
 
 private:
 	TWeakObjectPtr<UDevMenuItemBase> HostItem;
@@ -81,6 +93,9 @@ public:
 	virtual bool CanInsertChildItem() const override;
 	// 新規メニュー項目を追加する
 	virtual bool AddNewMenuItem(UClass* NewClass) const override;
+	// 新規メニュー項目を追加する
+	virtual void InsertNewMenuItem(UDevMenuItemBase* NewItem,
+	                               int32             Index) const override;
 	virtual void GetChildren(
 	    TArray<TSharedPtr<FDevMenuHierarchyModel>>& Children) override;
 private:

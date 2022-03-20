@@ -38,9 +38,11 @@ public:
 public:
 #if WITH_EDITOR
 
-    // 新規メニュー項目を追加する
+	// 新規メニュー項目を追加する
 	bool AddNewMenuItem(UClass* NewClass);
-    // 指定した項目を削除する
+	// 新規メニュー項目を追加する
+	void InsertNewMenuItem(UDevMenuItemBase* NewItem, int32 Index);
+	// 指定した項目を削除する
 	bool RemoveMenuItem(UDevMenuItemBase* RemoveItem);
 #endif
 

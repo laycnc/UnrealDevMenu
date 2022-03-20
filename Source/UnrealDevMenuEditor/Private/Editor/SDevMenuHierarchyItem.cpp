@@ -1,8 +1,11 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "SDevMenuHierarchyItem.h"
+#include "UnrealDevMenuEditor.h"
 #include "DevMenuHierarchyModel.h"
 #include "DragDrop/MenuTemplateDragDropOp.h"
+#include "DragDrop/MenuHierarchyDragDropOp.h"
+#include "DevMenu.h"
 
 #define LOCTEXT_NAMESPACE "SDevMenuHierarchyViewItem"
 
@@ -13,13 +16,13 @@ void SDevMenuHierarchyViewItem::Construct(
     TSharedPtr<FDevMenuHierarchyModel>      InModel)
 {
 	Editor = InEditor;
-	Model = InModel;
+	Model  = InModel;
 
 	// clang-format off
 	SuperType::Construct(SuperType::FArguments()
 		.OnCanAcceptDrop(this, &SDevMenuHierarchyViewItem::HandleCanAcceptDrop)
 		.OnAcceptDrop(this, &SDevMenuHierarchyViewItem::HandleAcceptDrop)
-		//.OnDragDetected(this, &SDevMenuHierarchyViewItem::HandleDragDetected)
+		.OnDragDetected(this, &SDevMenuHierarchyViewItem::HandleDragDetected)
 		//.OnDragEnter(this, &SDevMenuHierarchyViewItem::HandleDragEnter)
 		//.OnDragLeave(this, &SDevMenuHierarchyViewItem::HandleDragLeave)
         .Content()
@@ -43,6 +46,11 @@ SDevMenuHierarchyViewItem::~SDevMenuHierarchyViewItem() {}
 FReply SDevMenuHierarchyViewItem::HandleDragDetected(const FGeometry&     MyGeometry,
                                                      const FPointerEvent& MouseEvent)
 {
+	if ( Model.IsValid() )
+	{
+		return Model->HandleDragDetected(MyGeometry, MouseEvent);
+	}
+
 	return FReply::Unhandled();
 }
 
@@ -85,6 +93,55 @@ TOptional<EItemDropZone> SDevMenuHierarchyViewItem::HandleCanAcceptDrop(
 		    FEditorStyle::GetBrush(TEXT("Graph.ConnectorFeedback.Error"));
 	}
 
+	if ( TSharedPtr<FMenuHierarchyDragDropOp> HierarchyDragDropOp =
+	         DragDropEvent.GetOperationAs<FMenuHierarchyDragDropOp>() )
+	{
+#if 0
+		if ( DropZone == EItemDropZone::OntoItem )
+		{
+			HierarchyDragDropOp->CurrentIconBrush =
+			    FEditorStyle::GetBrush(TEXT("Graph.ConnectorFeedback.OK"));
+		}
+		else
+		{
+			//エラーテキストを入れる
+			HierarchyDragDropOp->CurrentHoverText = LOCTEXT(
+			    "NoAdditionalChildren", "Menu can't accept additional children.");
+			// エラーアイコンを入れる
+			HierarchyDragDropOp->CurrentIconBrush =
+			    FEditorStyle::GetBrush(TEXT("Graph.ConnectorFeedback.Error"));
+		}
+#else
+		UObject* Obj = Item->GetObject();
+
+		switch ( DropZone )
+		{
+			case EItemDropZone::AboveItem:
+				HierarchyDragDropOp->CurrentIconBrush =
+				    FEditorStyle::GetBrush(TEXT("Graph.ConnectorFeedback.ShowNode"));
+				break;
+			case EItemDropZone::OntoItem:
+				if ( Item->CanInsertChildItem() )
+				{
+					// 挿入可能なのでOK扱い
+					HierarchyDragDropOp->CurrentIconBrush =
+					    FEditorStyle::GetBrush(TEXT("Graph.ConnectorFeedback.OK"));
+					return EItemDropZone::OntoItem;
+				}
+				break;
+			case EItemDropZone::BelowItem:
+				HierarchyDragDropOp->CurrentIconBrush =
+				    FEditorStyle::GetBrush(TEXT("Graph.ConnectorFeedback.NewNode"));
+				break;
+			default:
+				break;
+		}
+
+#endif
+
+		return TOptional<EItemDropZone>();
+	}
+
 	return TOptional<EItemDropZone>();
 }
 
@@ -104,6 +161,24 @@ FReply SDevMenuHierarchyViewItem::HandleAcceptDrop(
 
 			return FReply::Handled();
 		}
+	}
+
+	if ( TSharedPtr<FMenuHierarchyDragDropOp> HierarchyDragDropOp =
+	         DragDropEvent.GetOperationAs<FMenuHierarchyDragDropOp>() )
+	{
+		UDevMenu* DevMenu = Editor.Pin()->GetDevMenuEdited();
+		TArray<TWeakObjectPtr<UDevMenuItemBase>> Items = HierarchyDragDropOp->Items;
+		for ( auto& WeakMoveItem : Items )
+		{
+			if ( WeakMoveItem.IsValid() )
+			{
+				UDevMenuItemBase* MoveItem = WeakMoveItem.Get();
+				DevMenu->RemoveMenuItem(MoveItem);
+				Item->InsertNewMenuItem(MoveItem, -1);
+			}
+		}
+		Editor.Pin()->OnChangedMenu.Broadcast();
+		return FReply::Handled();
 	}
 
 	return FReply::Unhandled();

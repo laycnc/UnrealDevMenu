@@ -2,6 +2,7 @@
 
 #include "DevMenuItem/DevMenuGroup.h"
 #include "DevMenuSubsystem.h"
+#include "DevMenu.h"
 
 UDevMenuGroup::UDevMenuGroup(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
@@ -82,6 +83,25 @@ bool UDevMenuGroup::AddNewMenuItem(UClass* NewClass)
 	return false;
 }
 
+// 新規メニュー項目を追加する
+void UDevMenuGroup::InsertNewMenuItem(UDevMenuItemBase* NewItem, int32 Index)
+{
+	Modify();
+
+	if ( Index == INDEX_NONE )
+	{
+		Items.Add(NewItem);
+	}
+	else
+	{
+		Items.Insert(NewItem, Index);
+	}
+	NewItem->Rename(nullptr, this);
+
+	PostEditChange();
+	MarkPackageDirty();
+}
+
 // 子項目を挿入出来るか？
 bool UDevMenuGroup::CanInsertChildItem() const
 {
@@ -93,6 +113,8 @@ bool UDevMenuGroup::RemoveMenuItem(UDevMenuItemBase* RemoveItem)
 {
 	if ( Items.Contains(RemoveItem) )
 	{
+		Modify();
+
 		Items.Remove(RemoveItem);
 
 		PostEditChange();

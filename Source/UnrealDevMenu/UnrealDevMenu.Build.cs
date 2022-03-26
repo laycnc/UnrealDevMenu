@@ -28,5 +28,10 @@ public class UnrealDevMenu : ModuleRules
 			}
             );
 
+        if( Target.Type == TargetType.Editor)
+        {
+            PrivateDependencyModuleNames.Add("UnrealEd");
+        }
+
     }
 }

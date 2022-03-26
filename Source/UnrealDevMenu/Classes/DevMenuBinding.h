@@ -24,5 +24,5 @@ public:
 	FName FunctionName;
 
 	UPROPERTY(EditAnywhere)
-	TArray<TObjectPtr<UField>> FunctionArgsType;
+	TArray<FString> FunctionArgsType;
 };

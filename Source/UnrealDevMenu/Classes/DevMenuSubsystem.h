@@ -76,9 +76,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "DevMenu")
 	void InitializeMenu(UDevMenu* InMenuAsset);
 
-	void RegisterInstance(FName Id, UDevMenuInstanceBase* InInstance);
-	UDevMenuInstanceBase* FindInstance(FName Id) const;
-
 	void RegisterWindow(const UDevMenu& InWindowDevMenu);
 
 	FDevMenuSubWindowInfo* GetWindowVariable(FName Id);
@@ -107,8 +104,4 @@ private:
 	// DevMenuの値
 	UPROPERTY(Transient)
 	FDevMenuVariableInfo VariableInfo;
-
-	// DevMenuの値
-	UPROPERTY(Transient)
-	TMap<FName, TObjectPtr<UDevMenuInstanceBase>> InstanceMap;
 };

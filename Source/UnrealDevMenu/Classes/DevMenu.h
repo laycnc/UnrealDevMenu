@@ -67,7 +67,8 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	bool bWindow;
 
-	UPROPERTY(EditDefaultsOnly, Instanced, AdvancedDisplay)
+    // メニューに配置されている要素
+	UPROPERTY(VisibleDefaultsOnly, Instanced, AdvancedDisplay)
 	TArray<TObjectPtr<UDevMenuItemBase>> Items;
 
 private:

@@ -16,7 +16,7 @@ public:
 	SLATE_BEGIN_ARGS(SDevMenuBindingFunctionNameWidget) {}
 	SLATE_ARGUMENT(TSharedPtr<IPropertyHandle>, LibraryClassProperty)
 	SLATE_ARGUMENT(TSharedPtr<IPropertyHandle>, FunctionNameProperty)
-	SLATE_ARGUMENT(TArray<TWeakObjectPtr<UField>>, FunctionArgsType)
+	SLATE_ARGUMENT(FDevMenuBinding, Binding)
 	SLATE_END_ARGS()
 
 public:
@@ -34,16 +34,16 @@ private:
 	bool IsCheckArgs(const UFunction* Function) const;
 
 private:
-	TSharedPtr<IPropertyHandle>    LibraryClassProperty;
-	TSharedPtr<IPropertyHandle>    FunctionNameProperty;
-	TArray<TWeakObjectPtr<UField>> FunctionArgsType;
+	TSharedPtr<IPropertyHandle> LibraryClassProperty;
+	TSharedPtr<IPropertyHandle> FunctionNameProperty;
+	FDevMenuBinding             Binding;
 };
 
 void SDevMenuBindingFunctionNameWidget::Construct(const FArguments& InArgs)
 {
 	LibraryClassProperty = InArgs._LibraryClassProperty;
 	FunctionNameProperty = InArgs._FunctionNameProperty;
-	FunctionArgsType     = InArgs._FunctionArgsType;
+	Binding              = InArgs._Binding;
 
 	// clang-format off
     ChildSlot
@@ -122,7 +122,7 @@ bool SDevMenuBindingFunctionNameWidget::IsEditEnabled() const
 // 関数の引数チェック
 bool SDevMenuBindingFunctionNameWidget::IsCheckArgs(const UFunction* Function) const
 {
-	if ( Function->NumParms != FunctionArgsType.Num() )
+	if ( Function->NumParms != Binding.FunctionArgsType.Num() )
 	{
 		// 引数の数が違うのでfalse
 		return false;
@@ -134,17 +134,22 @@ bool SDevMenuBindingFunctionNameWidget::IsCheckArgs(const UFunction* Function) c
 		return false;
 	}
 
-    // todo: 引数の形をチェックする必要がある
+	// 引数の形をチェックする必要がある
+	int32 ParamIndex = 0;
 	for ( FProperty* Property : TFieldRange<FProperty>(Function) )
 	{
-
-		if ( Property->PropertyFlags & CPF_ReturnParm )
-		{
-			// 戻り値
-		}
-		else if ( Property->PropertyFlags & CPF_Parm )
+		if ( Property->PropertyFlags & CPF_Parm )
 		{
 			// 引数
+			const FString& ArgsType = Binding.FunctionArgsType[ParamIndex];
+			FString        CppType  = Property->GetCPPType();
+			ParamIndex              = ParamIndex + 1;
+
+			if ( ArgsType != CppType )
+			{
+				// 型が違っている
+				return false;
+			}
 		}
 	}
 
@@ -164,22 +169,6 @@ void FDevMenuBindingCustomization::CustomizeHeader(
     FDetailWidgetRow&                HeaderRow,
     IPropertyTypeCustomizationUtils& CustomizationUtils)
 {
-	void* BindingPtr = nullptr;
-	if ( PropertyHandle->GetValueData(BindingPtr) == FPropertyAccess::Success )
-	{
-		if ( const auto* Binding =
-		         reinterpret_cast<const FDevMenuBinding*>(BindingPtr) )
-		{
-			Algo::Transform(
-			    Binding->FunctionArgsType,
-			    FunctionArgsType,
-			    [](TObjectPtr<UField> FunctionArgType) -> TWeakObjectPtr<UField>
-			    {
-				    return FunctionArgType;
-			    });
-		}
-	}
-
 	// clang-format off
 	HeaderRow
         .NameContent()
@@ -213,6 +202,13 @@ void FDevMenuBindingCustomization::CustomizeChildren(
 
 	ChildBuilder.AddProperty(LibraryClassProperty.ToSharedRef());
 
+	FDevMenuBinding Binding    = {};
+	void*           BindingPtr = nullptr;
+	if ( PropertyHandle->GetValueData(BindingPtr) == FPropertyAccess::Success )
+	{
+		Binding = *reinterpret_cast<const FDevMenuBinding*>(BindingPtr);
+	}
+
 	// clang-format off
 	// クラスが用意されている場合のみNameを表示する
     ChildBuilder
@@ -227,7 +223,7 @@ void FDevMenuBindingCustomization::CustomizeChildren(
             SNew(SDevMenuBindingFunctionNameWidget)
             	.LibraryClassProperty(LibraryClassProperty)
             	.FunctionNameProperty(FunctionNameProperty)
-                .FunctionArgsType(FunctionArgsType)
+                .Binding(Binding)
         ];
 	// clang-format on
 }

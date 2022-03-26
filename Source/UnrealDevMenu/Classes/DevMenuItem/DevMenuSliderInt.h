@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "DevMenuItem/DevMenuItemBase.h"
+class UDevMenuAdapterInt;
 #include "DevMenuSliderInt.generated.h"
 
 /**
@@ -37,4 +38,8 @@ public:
 	// スライダーの最大値
 	UPROPERTY(EditAnywhere, Category = "DevMenu")
 	int32 MaxValue;
+
+	// スライダーの参照する値
+	UPROPERTY(EditAnywhere, Instanced, Category = "DevMenu")
+	TObjectPtr<UDevMenuAdapterInt> TargetValue;
 };

@@ -2,6 +2,10 @@
 
 #include "DevMenuItem/DevMenuSliderInt.h"
 #include "DevMenuSubsystem.h"
+#include "Adapter/DevMenuAdapterInt.h"
+#include "DevMenuUtility.h"
+
+#define LOCTEXT_NAMESPACE "DevMenuSliderInt"
 
 UDevMenuSliderInt::UDevMenuSliderInt(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
@@ -18,16 +22,32 @@ void UDevMenuSliderInt::Initialize(UDevMenuSubsystem& InSubsystem) const
 // メニューの更新処理
 void UDevMenuSliderInt::UpdateMenu(UDevMenuSubsystem& InSubsystem) const
 {
-	int32 TargetValue = 0;
-	//if ( !InSubsystem.GetVariable(Id, TargetValue) )
-	//{
-	//	return;
-	//}
+
+	if ( !IsValid(TargetValue) )
+	{
+		// TargetValueが未設定なのでエラーを出して終了
+		FDevMenuUtility::MessageLog(this,
+		                            FText::FromString("TargetValue : invalid"));
+		ImGui::Text("[Error]");
+
+		return;
+	}
+
+	int32 CurrentValue = 0;
+	if ( IsValid(TargetValue) )
+	{
+		// 現在の値を反映する
+		CurrentValue = TargetValue->GetValue(&InSubsystem);
+	}
 
 	if ( ImGui::SliderInt(
-	         TCHAR_TO_UTF8(*Label.ToString()), &TargetValue, MinValue, MaxValue) )
+	         TCHAR_TO_UTF8(*Label.ToString()), &CurrentValue, MinValue, MaxValue) )
 	{
-		//InSubsystem.SetVariable(Id, TargetValue);
+		if ( IsValid(TargetValue) )
+		{
+			// 値の更新があったので反映
+			TargetValue->SetValue(&InSubsystem, CurrentValue);
+		}
 	}
 
 	if ( ImGui::IsItemHovered() )
@@ -39,3 +59,5 @@ void UDevMenuSliderInt::UpdateMenu(UDevMenuSubsystem& InSubsystem) const
 		}
 	}
 }
+
+#undef LOCTEXT_NAMESPACE

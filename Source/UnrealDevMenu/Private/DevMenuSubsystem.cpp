@@ -71,22 +71,6 @@ void UDevMenuSubsystem::InitializeMenu(UDevMenu* InMenuAsset)
 	InMenuAsset->GeneratedInstance(*this);
 }
 
-void UDevMenuSubsystem::RegisterInstance(FName                 Id,
-                                              UDevMenuInstanceBase* InInstance)
-{
-	//
-	InstanceMap.Add(Id, InInstance);
-}
-
-UDevMenuInstanceBase* UDevMenuSubsystem::FindInstance(FName Id) const
-{
-	if ( auto* Result = InstanceMap.Find(Id) )
-	{
-		return *Result;
-	}
-	return nullptr;
-}
-
 void UDevMenuSubsystem::RegisterWindow(const UDevMenu& InWindowDevMenu)
 {
 	WindowDevMenus.Add(&InWindowDevMenu);

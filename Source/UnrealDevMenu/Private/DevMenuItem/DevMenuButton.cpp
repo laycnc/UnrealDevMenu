@@ -6,7 +6,7 @@
 UDevMenuButton::UDevMenuButton(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
 {
-	Callback.FunctionArgsType.Add(UObject::StaticClass());
+	Callback.FunctionArgsType.Add(TEXT("UObject*"));
 }
 
 // メニューの更新処理

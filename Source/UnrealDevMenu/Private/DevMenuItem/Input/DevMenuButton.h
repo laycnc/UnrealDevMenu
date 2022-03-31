@@ -10,7 +10,7 @@
 /**
  * デバッグメニュー・ボタン
  */
-UCLASS(Category = "Input")
+UCLASS(Category = "Input", meta = (DisplayName = "Button"))
 class UDevMenuButton : public UDevMenuItemBase
 {
 	GENERATED_UCLASS_BODY()

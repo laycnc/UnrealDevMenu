@@ -9,7 +9,7 @@
 /**
  * デバッグメニュー・ラベル
  */
-UCLASS(Category = "Common")
+UCLASS(Category = "Common", meta = (DisplayName = "Label"))
 class UDevMenuLabel : public UDevMenuItemBase
 {
 	GENERATED_UCLASS_BODY()

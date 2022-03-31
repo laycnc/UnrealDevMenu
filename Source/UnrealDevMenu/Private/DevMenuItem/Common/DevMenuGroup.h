@@ -10,7 +10,7 @@ class UDevMenu;
 /**
  * デバッグメニュー・グループ
  */
-UCLASS(Category = "Common")
+UCLASS(Category = "Common", meta = (DisplayName = "Group"))
 class UNREALDEVMENU_API UDevMenuGroup : public UDevMenuItemBase
 {
 	GENERATED_UCLASS_BODY()

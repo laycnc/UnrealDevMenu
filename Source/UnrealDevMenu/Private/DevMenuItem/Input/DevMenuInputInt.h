@@ -4,12 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "DevMenuItemBase.h"
+class UDevMenuAdapterInt;
 #include "DevMenuInputInt.generated.h"
 
 /**
  * 整数値テキスト入力ボックス
  */
-UCLASS(Category = "Input")
+UCLASS(Category = "Input", meta = (DisplayName = "Input Int"))
 class UDevMenuInputInt : public UDevMenuItemBase
 {
 	GENERATED_UCLASS_BODY()

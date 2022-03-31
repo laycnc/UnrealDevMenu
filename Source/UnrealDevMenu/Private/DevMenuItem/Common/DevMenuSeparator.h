@@ -7,9 +7,9 @@
 #include "DevMenuSeparator.generated.h"
 
 /**
- * 
+ * デバッグメニュー・セパレーター
  */
-UCLASS(Category = "Common")
+UCLASS(Category = "Common", meta = (DisplayName = "Separator"))
 class UDevMenuSeparator : public UDevMenuItemBase
 {
 	GENERATED_UCLASS_BODY()

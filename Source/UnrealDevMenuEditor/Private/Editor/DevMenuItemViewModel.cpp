@@ -105,7 +105,7 @@ TSharedRef<ITableRow> FDevMenuItemClassViewModel::BuildRow(
 {
 	const UClass* Class = ClassData.GetClass();
 	const FText   ClassName =
-        IsValid(Class) ? FText::FromString(Class->GetName()) : FText::GetEmpty();
+        IsValid(Class) ? Class->GetDisplayNameText() : FText::GetEmpty();
 	const FText Description = Class->GetToolTipText();
 
 	// clang-format off

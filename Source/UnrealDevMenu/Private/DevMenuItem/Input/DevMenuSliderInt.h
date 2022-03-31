@@ -10,7 +10,7 @@ class UDevMenuAdapterInt;
 /**
  * 整数値テキスト入力スライダー
  */
-UCLASS(Category = "Input")
+UCLASS(Category = "Input", meta = (DisplayName = "Slider Int"))
 class UDevMenuSliderInt : public UDevMenuItemBase
 {
 	GENERATED_UCLASS_BODY()

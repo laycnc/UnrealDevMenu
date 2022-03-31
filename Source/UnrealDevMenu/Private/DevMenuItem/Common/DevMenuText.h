@@ -9,7 +9,7 @@
 /**
  * デバッグメニュー・テキスト
  */
-UCLASS(Category = "Common")
+UCLASS(Category = "Common", meta = (DisplayName = "Text"))
 class UDevMenuText : public UDevMenuItemBase
 {
 	GENERATED_UCLASS_BODY()

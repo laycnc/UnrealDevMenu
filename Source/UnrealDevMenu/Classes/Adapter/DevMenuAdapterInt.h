@@ -8,7 +8,7 @@ class UDevMenuSubsystem;
 #include "DevMenuAdapterInt.generated.h"
 
 /**
- * デバッグメニューの値
+ * デバッグメニューの整数値アクセスアダプター
  */
 UCLASS(Abstract, Const, Blueprintable)
 class UNREALDEVMENU_API UDevMenuAdapterInt : public UDevMenuAdapter

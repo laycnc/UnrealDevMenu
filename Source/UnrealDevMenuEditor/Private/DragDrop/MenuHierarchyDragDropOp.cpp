@@ -1,5 +1,5 @@
 #include "MenuHierarchyDragDropOp.h"
-#include "DevMenuItem/DevMenuItemBase.h"
+#include "DevMenuItemBase.h"
 
 #define LOCTEXT_NAMESPACE "FMenuHierarchyDragDropOp"
 

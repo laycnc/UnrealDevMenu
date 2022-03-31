@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "DevMenu.h"
-#include "DevMenuItem/DevMenuItemBase.h"
+#include "DevMenuItemBase.h"
 #include "DevMenuInstanceBase.h"
 #include "DevMenuSubsystem.h"
 

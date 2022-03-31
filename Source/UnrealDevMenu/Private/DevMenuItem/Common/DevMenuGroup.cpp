@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "DevMenuItem/DevMenuGroup.h"
+#include "DevMenuItem/Common/DevMenuGroup.h"
 #include "DevMenuSubsystem.h"
 #include "DevMenu.h"
 
@@ -26,7 +26,6 @@ void UDevMenuGroup::Initialize(UDevMenuSubsystem& InSubsystem) const
 void UDevMenuGroup::UpdateMenu(UDevMenuSubsystem& InSubsystem) const
 {
 #if WITH_IMGUI
-
 
 	if ( ImGui::BeginMenu(TCHAR_TO_UTF8(*Id.ToString())) )
 	{

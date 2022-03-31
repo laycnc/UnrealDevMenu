@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "DevMenuItem/DevMenuItemBase.h"
+#include "DevMenuItemBase.h"
 class UDevMenu;
 #include "DevMenuSubMenu.generated.h"
 

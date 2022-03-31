@@ -1,6 +1,6 @@
 #include "DevMenuHierarchyModel.h"
 #include "DevMenu.h"
-#include "DevMenuItem/DevMenuItemBase.h"
+#include "DevMenuItemBase.h"
 #include "DevMenuItemInterface.h"
 #include "DragDrop/MenuHierarchyDragDropOp.h"
 

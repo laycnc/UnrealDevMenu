@@ -1,11 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "DevMenuItem/DevMenuSliderInt.h"
+#include "DevMenuItem/Input/DevMenuSliderInt.h"
 #include "DevMenuSubsystem.h"
 #include "Adapter/DevMenuAdapterInt.h"
 #include "DevMenuUtility.h"
-
-#define LOCTEXT_NAMESPACE "DevMenuSliderInt"
 
 UDevMenuSliderInt::UDevMenuSliderInt(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
@@ -22,6 +20,7 @@ void UDevMenuSliderInt::Initialize(UDevMenuSubsystem& InSubsystem) const
 // メニューの更新処理
 void UDevMenuSliderInt::UpdateMenu(UDevMenuSubsystem& InSubsystem) const
 {
+#if WITH_IMGUI
 
 	if ( !IsValid(TargetValue) )
 	{
@@ -33,21 +32,14 @@ void UDevMenuSliderInt::UpdateMenu(UDevMenuSubsystem& InSubsystem) const
 		return;
 	}
 
-	int32 CurrentValue = 0;
-	if ( IsValid(TargetValue) )
-	{
-		// 現在の値を反映する
-		CurrentValue = TargetValue->GetValue(&InSubsystem);
-	}
+	// 現在の値を取得する
+	int32 CurrentValue = TargetValue->GetValue(&InSubsystem);
 
 	if ( ImGui::SliderInt(
 	         TCHAR_TO_UTF8(*Label.ToString()), &CurrentValue, MinValue, MaxValue) )
 	{
-		if ( IsValid(TargetValue) )
-		{
-			// 値の更新があったので反映
-			TargetValue->SetValue(&InSubsystem, CurrentValue);
-		}
+		// 値の更新があったので反映
+		TargetValue->SetValue(&InSubsystem, CurrentValue);
 	}
 
 	if ( ImGui::IsItemHovered() )
@@ -58,6 +50,6 @@ void UDevMenuSliderInt::UpdateMenu(UDevMenuSubsystem& InSubsystem) const
 			ImGui::SetTooltip(TCHAR_TO_UTF8(*Tooltip.ToString()));
 		}
 	}
-}
 
-#undef LOCTEXT_NAMESPACE
+#endif
+}

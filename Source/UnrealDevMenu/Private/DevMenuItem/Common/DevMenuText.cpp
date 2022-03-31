@@ -1,19 +1,19 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "DevMenuItem/DevMenuLabel.h"
+#include "DevMenuItem/Common/DevMenuText.h"
 #include "DevMenuSubsystem.h"
 
-UDevMenuLabel::UDevMenuLabel(const FObjectInitializer& ObjectInitializer)
+UDevMenuText::UDevMenuText(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
 {
 }
 
 // メニューの更新処理
-void UDevMenuLabel::UpdateMenu(UDevMenuSubsystem& InSubsystem) const
+void UDevMenuText::UpdateMenu(UDevMenuSubsystem& InSubsystem) const
 {
-	// ラベルを表示する
-	ImGui::LabelText(TCHAR_TO_UTF8(*Id.ToString()),
-	                 TCHAR_TO_UTF8(*Label.ToString()));
+#if WITH_IMGUI
+	// テキストを表示する
+	ImGui::Text(TCHAR_TO_UTF8(*Text.ToString()));
 
 	if ( ImGui::IsItemHovered() )
 	{
@@ -23,4 +23,5 @@ void UDevMenuLabel::UpdateMenu(UDevMenuSubsystem& InSubsystem) const
 			ImGui::SetTooltip(TCHAR_TO_UTF8(*Tooltip.ToString()));
 		}
 	}
+#endif
 }

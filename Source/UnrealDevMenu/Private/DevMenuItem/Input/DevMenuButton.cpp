@@ -1,6 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "DevMenuItem/DevMenuButton.h"
+#include "DevMenuItem/Input/DevMenuButton.h"
 #include "DevMenuSubsystem.h"
 
 UDevMenuButton::UDevMenuButton(const FObjectInitializer& ObjectInitializer)
@@ -12,6 +12,8 @@ UDevMenuButton::UDevMenuButton(const FObjectInitializer& ObjectInitializer)
 // メニューの更新処理
 void UDevMenuButton::UpdateMenu(UDevMenuSubsystem& InSubsystem) const
 {
+#if WITH_IMGUI
+
 	// ラベルを表示する
 	if ( ImGui::Button(TCHAR_TO_UTF8(*Label.ToString())) )
 	{
@@ -35,4 +37,6 @@ void UDevMenuButton::UpdateMenu(UDevMenuSubsystem& InSubsystem) const
 			ImGui::SetTooltip(TCHAR_TO_UTF8(*Tooltip.ToString()));
 		}
 	}
+
+#endif
 }

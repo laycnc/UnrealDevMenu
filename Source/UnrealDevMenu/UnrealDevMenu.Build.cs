@@ -23,6 +23,7 @@ public class UnrealDevMenu : ModuleRules
                 "Engine",
                 "Slate",
                 "SlateCore",
+                "GameplayTags",
                 "ImGui"
 				// ... add private dependencies that you statically link with here ...	
 			}

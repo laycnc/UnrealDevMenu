@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "Adapter/DevMenuAdapterInt.h"
 #include "DevMenuAdapterInt_DevMenuParam.generated.h"
 
@@ -23,7 +24,9 @@ public:
 	    UDevMenuSubsystem* Subsystem) const override;
 
 private:
-	// デバッグメニューパラメータのID
-	UPROPERTY(EditAnywhere, Category = "DevMenu|DevMenuParam")
-	FName Id;
+	// パラメータ
+	UPROPERTY(EditAnywhere,
+	          meta     = (Categories = "DevMenuParam"),
+	          Category = "DevMenu")
+	FGameplayTag ParamId;
 };

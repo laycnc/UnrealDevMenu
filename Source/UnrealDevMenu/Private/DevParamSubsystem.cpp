@@ -11,8 +11,26 @@
 #include "ParamType/DevParamDataAsset.h"
 #include "Kismet/KismetStringLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Engine/Engine.h"
 
 DEFINE_LOG_CATEGORY(LogDevMenuParam);
+
+// デバッグパラメータサブシステムの取得
+UDevParamSubsystem* UDevParamSubsystem::Get(const UObject* InWorldContext)
+{
+	const UWorld* World = GEngine->GetWorldFromContextObject(
+	    InWorldContext, EGetWorldErrorMode::ReturnNull);
+	if ( IsValid(World) )
+	{
+		if ( const UGameInstance* GameInstance = World->GetGameInstance() )
+		{
+			auto* Subsystem =
+			    GameInstance->GetSubsystemBase(UDevParamSubsystem::StaticClass());
+			return Cast<UDevParamSubsystem>(Subsystem);
+		}
+	}
+	return nullptr;
+}
 
 // USubsystem implementation Begin
 void UDevParamSubsystem::Initialize(FSubsystemCollectionBase& Collection)

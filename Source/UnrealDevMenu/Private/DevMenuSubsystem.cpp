@@ -2,6 +2,7 @@
 
 #include "DevMenuSubsystem.h"
 #include "Engine/World.h"
+#include "DevMenu.h"
 
 // USubsystem implementation Begin
 void UDevMenuSubsystem::Initialize(FSubsystemCollectionBase& Collection)
@@ -74,92 +75,16 @@ void UDevMenuSubsystem::InitializeMenu(UDevMenu* InMenuAsset)
 void UDevMenuSubsystem::RegisterWindow(const UDevMenu& InWindowDevMenu)
 {
 	WindowDevMenus.Add(&InWindowDevMenu);
-	VariableInfo.WindowVariables.FindOrAdd(InWindowDevMenu.Id);
+	WindowVariables.FindOrAdd(InWindowDevMenu.Id);
 }
 
 FDevMenuSubWindowInfo* UDevMenuSubsystem::GetWindowVariable(FName Id)
 {
-	if ( auto* Result = VariableInfo.WindowVariables.Find(Id) )
+	if ( auto* Result = WindowVariables.Find(Id) )
 	{
 		return Result;
 	}
 	return nullptr;
-}
-
-bool UDevMenuSubsystem::GetVariable(FName Id, int32& OutValue) const
-{
-	if ( auto* Result = VariableInfo.IntVariables.Find(Id) )
-	{
-		OutValue = *Result;
-		return true;
-	}
-	return false;
-}
-
-bool UDevMenuSubsystem::GetVariable(FName Id, float& OutValue) const
-{
-	if ( auto* Result = VariableInfo.FloatVariables.Find(Id) )
-	{
-		OutValue = *Result;
-		return true;
-	}
-	return false;
-}
-
-bool UDevMenuSubsystem::GetVariable(FName Id, FName& OutValue) const
-{
-	if ( auto* Result = VariableInfo.NameVariables.Find(Id) )
-	{
-		OutValue = *Result;
-		return true;
-	}
-	return false;
-}
-
-bool UDevMenuSubsystem::GetVariable(FName Id, FString& OutValue) const
-{
-	if ( auto* Result = VariableInfo.StringVariables.Find(Id) )
-	{
-		OutValue = *Result;
-		return true;
-	}
-	return false;
-}
-
-void UDevMenuSubsystem::SetVariable(FName Id, int32 NewValue)
-{
-	int32& Value = VariableInfo.IntVariables.FindOrAdd(Id);
-	if ( Value != NewValue )
-	{
-		Value = NewValue;
-	}
-}
-
-void UDevMenuSubsystem::SetVariable(FName Id, float NewValue)
-{
-	float& Value = VariableInfo.FloatVariables.FindOrAdd(Id);
-	if ( Value != NewValue )
-	{
-		Value = NewValue;
-	}
-}
-
-void UDevMenuSubsystem::SetVariable(FName Id, FName NewValue)
-{
-	FName& Value = VariableInfo.NameVariables.FindOrAdd(Id);
-	if ( Value != NewValue )
-	{
-		Value = NewValue;
-	}
-}
-
-void UDevMenuSubsystem::SetVariable(FName Id, const FString& NewValue)
-{
-	FString& Value = VariableInfo.StringVariables.FindOrAdd(Id);
-	if ( Value != NewValue )
-	{
-		Value = NewValue;
-	}
 }
 
 void UDevMenuSubsystem::ImGuiTick()

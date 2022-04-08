@@ -25,6 +25,11 @@ class UDevParamSubsystem : public UGameInstanceSubsystem
 
 
 public:
+	/**
+     * デバッグパラメータサブシステムの取得
+     */
+	static UNREALDEVMENU_API UDevParamSubsystem* Get(const UObject* InWorldContext);
+
 	// USubsystem implementation Begin
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 	virtual void Deinitialize() override;

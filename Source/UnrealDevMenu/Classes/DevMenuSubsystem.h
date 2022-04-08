@@ -25,37 +25,10 @@ public:
 };
 
 /**
- * DevMenuで記録する値
- * Key   = UDevMenuItemBase::Id
- * Value = 記録値
+ * デバッグメニューサブシステム
  */
-USTRUCT()
-struct FDevMenuVariableInfo
-{
-	GENERATED_BODY();
-
-public:
-	UPROPERTY()
-	TMap<FName, int32> IntVariables;
-
-	UPROPERTY()
-	TMap<FName, float> FloatVariables;
-
-	UPROPERTY()
-	TMap<FName, FName> NameVariables;
-
-	UPROPERTY()
-	TMap<FName, FString> StringVariables;
-
-	UPROPERTY()
-	TMap<FName, FDevMenuSubWindowInfo> WindowVariables;
-};
-
-/**
- *
- */
-UCLASS()
-class UNREALDEVMENU_API UDevMenuSubsystem : public UTickableWorldSubsystem
+UCLASS(MinimalAPI)
+class UDevMenuSubsystem : public UTickableWorldSubsystem
 {
 	GENERATED_BODY()
 
@@ -74,21 +47,11 @@ public:
 	 * @brief メニューの初期化
 	*/
 	UFUNCTION(BlueprintCallable, Category = "DevMenu")
-	void InitializeMenu(UDevMenu* InMenuAsset);
+	UNREALDEVMENU_API void InitializeMenu(UDevMenu* InMenuAsset);
 
 	void RegisterWindow(const UDevMenu& InWindowDevMenu);
 
 	FDevMenuSubWindowInfo* GetWindowVariable(FName Id);
-	bool                   GetVariable(FName Id, int32& OutValue) const;
-	bool                   GetVariable(FName Id, float& OutValue) const;
-	bool                   GetVariable(FName Id, FName& OutValue) const;
-	bool                   GetVariable(FName Id, FString& OutValue) const;
-	void                   SetVariable(FName Id, int32 NewValue);
-	void                   SetVariable(FName Id, float NewValue);
-	void                   SetVariable(FName Id, FName NewValue);
-	void                   SetVariable(FName Id, const FString& NewValue);
-
-
 private:
 	void ImGuiTick();
 
@@ -103,5 +66,5 @@ private:
 
 	// DevMenuの値
 	UPROPERTY(Transient)
-	FDevMenuVariableInfo VariableInfo;
+	TMap<FName, FDevMenuSubWindowInfo> WindowVariables;
 };

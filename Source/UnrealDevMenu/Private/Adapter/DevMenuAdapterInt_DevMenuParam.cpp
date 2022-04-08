@@ -2,6 +2,7 @@
 
 #include "Adapter/DevMenuAdapterInt_DevMenuParam.h"
 #include "DevMenuSubsystem.h"
+#include "DevParamSubsystem.h"
 
 UDevMenuAdapterInt_DevMenuParam::UDevMenuAdapterInt_DevMenuParam(
     const FObjectInitializer& ObjectInitializer)
@@ -14,9 +15,10 @@ void UDevMenuAdapterInt_DevMenuParam::SetValue_Implementation(
     UDevMenuSubsystem* InSubsystem,
     int32              NewValue) const
 {
-	if ( InSubsystem )
+	UDevParamSubsystem* DevParamSystem = UDevParamSubsystem::Get(InSubsystem);
+	if ( DevParamSystem )
 	{
-		InSubsystem->SetVariable(Id, NewValue);
+		DevParamSystem->SetValueByInt32(ParamId, NewValue);
 	}
 }
 
@@ -24,10 +26,11 @@ void UDevMenuAdapterInt_DevMenuParam::SetValue_Implementation(
 int32 UDevMenuAdapterInt_DevMenuParam::GetValue_Implementation(
     UDevMenuSubsystem* InSubsystem) const
 {
-	int32 Result = 0;
-	if ( InSubsystem )
+	int32               Result         = 0;
+	UDevParamSubsystem* DevParamSystem = UDevParamSubsystem::Get(InSubsystem);
+	if ( DevParamSystem )
 	{
-		InSubsystem->GetVariable(Id, Result);
+		DevParamSystem->GetValueByInt32(ParamId, Result);
 	}
 	return Result;
 }

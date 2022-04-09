@@ -5,29 +5,29 @@
 #include "CoreMinimal.h"
 #include "DevMenuItemBase.h"
 class UDevMenuAdapterString;
-#include "DevMenuLabel.generated.h"
+#include "DevMenuInputText.generated.h"
 
 /**
- * デバッグメニュー・ラベル
+ * テキスト入力ボックス
  */
-UCLASS(Category = "Common", meta = (DisplayName = "Label"))
-class UDevMenuLabel : public UDevMenuItemBase
+UCLASS(Category = "Input", meta = (DisplayName = "Input Text"))
+class UDevMenuInputText : public UDevMenuItemBase
 {
 	GENERATED_UCLASS_BODY()
+
 public:
 	// メニューの更新処理
 	virtual void UpdateMenu(UDevMenuSubsystem& InSubsystem) const override;
 
-
 public:
-	// 表示する文字列
-	UPROPERTY(EditAnywhere, Instanced, Category = "DevMenu")
-	TObjectPtr<UDevMenuAdapterString> TargetText;
-
-	// メニューの項目名
+	// ボタンラ名
 	UPROPERTY(EditAnywhere, Category = "DevMenu")
 	FText Label;
 	// メニューの説明
 	UPROPERTY(EditAnywhere, Category = "DevMenu")
 	FText Tooltip;
+
+	// スライダーの参照する値
+	UPROPERTY(EditAnywhere, Instanced, Category = "DevMenu")
+	TObjectPtr<UDevMenuAdapterString> TargetValue;
 };

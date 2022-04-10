@@ -2,7 +2,7 @@
 
 #include "AssetTypeActions_DevParamDataAsset.h"
 #include "ParamType/DevParamDataAsset.h"
-#include "Editor/UnrealDevMenuEditor.h"
+#include "DevParamEditor/DevParamEditor.h"
 
 #define LOCTEXT_NAMESPACE "FAssetTypeActions_DevParamDataAsset"
 
@@ -50,17 +50,14 @@ void FAssetTypeActions_DevParamDataAsset::OpenAssetEditor(
     const TArray<UObject*>&        InObjects,
     TSharedPtr<class IToolkitHost> EditWithinLevelEditor)
 {
-#if 1
-	FAssetTypeActions_Base::OpenAssetEditor(InObjects, EditWithinLevelEditor);
-#else
 	const EToolkitMode::Type Mode = EditWithinLevelEditor.IsValid()
 	                                    ? EToolkitMode::WorldCentric
 	                                    : EToolkitMode::Standalone;
 
 	for ( UObject* ObjIt : InObjects )
 	{
-		UDevMenu* DevMenu = Cast<UDevMenu>(ObjIt);
-		if ( DevMenu == nullptr )
+		UDevParamDataAsset* DevParamDataAsset = Cast<UDevParamDataAsset>(ObjIt);
+		if ( DevParamDataAsset == nullptr )
 		{
 			continue;
 		}
@@ -68,25 +65,23 @@ void FAssetTypeActions_DevParamDataAsset::OpenAssetEditor(
 		const bool            bFocusIfOpen = false;
 		IAssetEditorInstance* EditorInstance =
 		    GEditor->GetEditorSubsystem<UAssetEditorSubsystem>()->FindEditorForAsset(
-		        DevMenu, bFocusIfOpen);
-		FUnrealDevMenuEditor* ExistingInstance =
-		    static_cast<FUnrealDevMenuEditor*>(EditorInstance);
+		        DevParamDataAsset, bFocusIfOpen);
+		FDevParamEditor* ExistingInstance =
+		    static_cast<FDevParamEditor*>(EditorInstance);
 
-		if ( ExistingInstance && ExistingInstance->GetDevMenuEdited() == nullptr )
+		if ( ExistingInstance && ExistingInstance->GetDevParamEdited() == nullptr )
 		{
 			// 既存のエディターがあるのでそれを流用する
 			ExistingInstance->InitDevMenuEditor(
-			    Mode, EditWithinLevelEditor, DevMenu);
+			    Mode, EditWithinLevelEditor, DevParamDataAsset);
 		}
 		else
 		{
-			TSharedRef<FUnrealDevMenuEditor> NewDevMenuEditor(
-			    new FUnrealDevMenuEditor());
+			TSharedRef<FDevParamEditor> NewDevMenuEditor(new FDevParamEditor());
 			NewDevMenuEditor->InitDevMenuEditor(
-			    Mode, EditWithinLevelEditor, DevMenu);
+			    Mode, EditWithinLevelEditor, DevParamDataAsset);
 		}
 	}
-#endif
 }
 
 #undef LOCTEXT_NAMESPACE

@@ -21,10 +21,14 @@ public:
 
 	// クラスキャッシュを取得する
 	virtual TSharedRef<FGraphNodeClassHelper> GetMenuItemClassCache() override;
+	virtual TSharedPtr<FExtensibilityManager> GetToolBarExtensibilityManager()
+	    const override;
 private:
 	TArray<TSharedPtr<IAssetTypeActions>> CreatedAssetTypeActions;
 	// クラスキャッシュノード
 	TSharedPtr<FGraphNodeClassHelper> ClassCache;
+
+	TSharedPtr<FExtensibilityManager> ToolBarExtensibilityManager;
 
 	EAssetTypeCategories::Type DevMenuAssetCategoryBit = EAssetTypeCategories::Misc;
 };
@@ -32,6 +36,7 @@ private:
 void FUnrealDevMenuEditorModule::StartupModule()
 {
 	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
+	ToolBarExtensibilityManager = MakeShareable(new FExtensibilityManager);
 
 	{
 		// アセットタイプアクションを登録する
@@ -97,6 +102,8 @@ void FUnrealDevMenuEditorModule::ShutdownModule()
 		PropertyModule.UnregisterCustomPropertyTypeLayout(TEXT("DevMenuBinding"));
 		PropertyModule.UnregisterCustomClassLayout(TEXT("DevParamStructType"));
 	}
+
+	ToolBarExtensibilityManager.Reset();
 }
 
 // クラスキャッシュを取得する
@@ -111,6 +118,12 @@ TSharedRef<FGraphNodeClassHelper> FUnrealDevMenuEditorModule::GetMenuItemClassCa
 	}
 
 	return ClassCache.ToSharedRef();
+}
+
+TSharedPtr<FExtensibilityManager> FUnrealDevMenuEditorModule::
+    GetToolBarExtensibilityManager() const
+{
+	return ToolBarExtensibilityManager;
 }
 
 #undef LOCTEXT_NAMESPACE

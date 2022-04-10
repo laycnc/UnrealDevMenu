@@ -6,6 +6,7 @@
 #include "PropertyEditorModule.h"
 #include "AssetTypeActions/AssetTypeActions_DevMenu.h"
 #include "Details/DevMenuBindingDetails.h"
+#include "Details/DevParamStructTypeDetails.h"
 #include "AIGraphTypes.h"
 
 #define LOCTEXT_NAMESPACE "FDevMenuModule"
@@ -39,6 +40,11 @@ void FUnrealDevMenuEditorModule::StartupModule()
 	    FModuleManager::GetModuleChecked<FPropertyEditorModule>(
 	        TEXT("PropertyEditor"));
 
+	PropertyModule.RegisterCustomClassLayout(
+	    "DevParamStructType",
+	    FOnGetDetailCustomizationInstance::CreateStatic(
+	        &FDevParamStructTypeCustomization::MakeInstance));
+
 	PropertyModule.RegisterCustomPropertyTypeLayout(
 	    "DevMenuBinding",
 	    FOnGetPropertyTypeCustomizationInstance::CreateStatic(
@@ -61,7 +67,9 @@ void FUnrealDevMenuEditorModule::ShutdownModule()
 	    FModuleManager::GetModuleChecked<FPropertyEditorModule>(
 	        TEXT("PropertyEditor"));
 
-	PropertyModule.UnregisterCustomPropertyTypeLayout("DevMenuBinding");
+	PropertyModule.UnregisterCustomPropertyTypeLayout(TEXT("DevMenuBinding"));
+
+	PropertyModule.UnregisterCustomClassLayout(TEXT("DevParamStructType"));
 }
 
 // クラスキャッシュを取得する

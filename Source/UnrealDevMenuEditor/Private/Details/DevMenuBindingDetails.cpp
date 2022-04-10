@@ -145,10 +145,21 @@ bool SDevMenuBindingFunctionNameWidget::IsCheckArgs(const UFunction* Function) c
 			FString        CppType  = Property->GetCPPType();
 			ParamIndex              = ParamIndex + 1;
 
-			if ( ArgsType != CppType )
+			// Real型の場合には特殊化が必要
+			if ( ArgsType == TEXT("Real") )
 			{
-				// 型が違っている
-				return false;
+				if ( CppType != TEXT("float") && CppType != TEXT("double") )
+				{
+					return false;
+				}
+			}
+			else
+			{
+				if ( ArgsType != CppType )
+				{
+					// 型が違っている
+					return false;
+				}
 			}
 		}
 	}

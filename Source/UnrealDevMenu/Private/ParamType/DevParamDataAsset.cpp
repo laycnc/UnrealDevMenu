@@ -2,8 +2,7 @@
 
 #include "ParamType/DevParamDataAsset.h"
 
-UDevParamDataAsset::UDevParamDataAsset(
-    const FObjectInitializer& ObjectInitializer)
+UDevParamDataAsset::UDevParamDataAsset(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
 {
 }

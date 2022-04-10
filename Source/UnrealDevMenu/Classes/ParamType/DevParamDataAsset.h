@@ -7,8 +7,9 @@
 class UDevParamType;
 #include "DevParamDataAsset.generated.h"
 
+
 /**
- * 
+ * デバッグパラメータ定義アセット
  */
 UCLASS()
 class UDevParamDataAsset : public UDataAsset

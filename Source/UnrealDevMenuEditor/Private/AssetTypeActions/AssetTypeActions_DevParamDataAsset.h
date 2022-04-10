@@ -9,10 +9,10 @@
 /**
  *
  */
-class FAssetTypeActions_DevMenu : public FAssetTypeActions_Base
+class FAssetTypeActions_DevParamDataAsset : public FAssetTypeActions_Base
 {
 public:
-	FAssetTypeActions_DevMenu(uint32 InCategory);
+	FAssetTypeActions_DevParamDataAsset(uint32 InCategory);
 	// IAssetTypeActions Implementation
 	virtual FText   GetName() const override;
 	virtual FColor  GetTypeColor() const override;
@@ -24,6 +24,7 @@ public:
 	virtual void    OpenAssetEditor(
 	       const TArray<UObject*>&        InObjects,
 	       TSharedPtr<class IToolkitHost> EditWithinLevelEditor) override;
+
 private:
 	uint32 Category;
 };

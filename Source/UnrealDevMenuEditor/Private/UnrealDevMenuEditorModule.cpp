@@ -5,6 +5,7 @@
 #include "AssetToolsModule.h"
 #include "PropertyEditorModule.h"
 #include "AssetTypeActions/AssetTypeActions_DevMenu.h"
+#include "AssetTypeActions/AssetTypeActions_DevParamDataAsset.h"
 #include "Details/DevMenuBindingDetails.h"
 #include "Details/DevParamStructTypeDetails.h"
 #include "AIGraphTypes.h"
@@ -21,34 +22,53 @@ public:
 	// クラスキャッシュを取得する
 	virtual TSharedRef<FGraphNodeClassHelper> GetMenuItemClassCache() override;
 private:
-	TSharedPtr<IAssetTypeActions> Action;
+	TArray<TSharedPtr<IAssetTypeActions>> CreatedAssetTypeActions;
 	// クラスキャッシュノード
 	TSharedPtr<FGraphNodeClassHelper> ClassCache;
+
+	EAssetTypeCategories::Type DevMenuAssetCategoryBit = EAssetTypeCategories::Misc;
 };
 
 void FUnrealDevMenuEditorModule::StartupModule()
 {
 	// This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
 
-	// Register asset types
-	IAssetTools& AssetTools =
-	    FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
-	Action = MakeShareable(new FAssetTypeActions_DevMenu());
-	AssetTools.RegisterAssetTypeActions(Action.ToSharedRef());
+	{
+		// アセットタイプアクションを登録する
+		IAssetTools& AssetTools =
+		    FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
 
-	FPropertyEditorModule& PropertyModule =
-	    FModuleManager::GetModuleChecked<FPropertyEditorModule>(
-	        TEXT("PropertyEditor"));
+		DevMenuAssetCategoryBit = AssetTools.RegisterAdvancedAssetCategory(
+		    FName(TEXT("DevMenu")), LOCTEXT("DevMenuAssetCategory", "DevMenu"));
 
-	PropertyModule.RegisterCustomClassLayout(
-	    "DevParamStructType",
-	    FOnGetDetailCustomizationInstance::CreateStatic(
-	        &FDevParamStructTypeCustomization::MakeInstance));
+		auto AddActionType = [&](TSharedPtr<IAssetTypeActions> NewAction)
+		{
+			CreatedAssetTypeActions.Add(NewAction);
+			AssetTools.RegisterAssetTypeActions(NewAction.ToSharedRef());
+		};
 
-	PropertyModule.RegisterCustomPropertyTypeLayout(
-	    "DevMenuBinding",
-	    FOnGetPropertyTypeCustomizationInstance::CreateStatic(
-	        &FDevMenuBindingCustomization::MakeInstance));
+		AddActionType(
+		    MakeShareable(new FAssetTypeActions_DevMenu(DevMenuAssetCategoryBit)));
+		AddActionType(MakeShareable(
+		    new FAssetTypeActions_DevParamDataAsset(DevMenuAssetCategoryBit)));
+	}
+
+	{
+		// 詳細タブ拡張を登録解除
+		FPropertyEditorModule& PropertyModule =
+		    FModuleManager::GetModuleChecked<FPropertyEditorModule>(
+		        TEXT("PropertyEditor"));
+
+		PropertyModule.RegisterCustomClassLayout(
+		    TEXT("DevParamStructType"),
+		    FOnGetDetailCustomizationInstance::CreateStatic(
+		        &FDevParamStructTypeCustomization::MakeInstance));
+
+		PropertyModule.RegisterCustomPropertyTypeLayout(
+		    TEXT("DevMenuBinding"),
+		    FOnGetPropertyTypeCustomizationInstance::CreateStatic(
+		        &FDevMenuBindingCustomization::MakeInstance));
+	}
 }
 
 void FUnrealDevMenuEditorModule::ShutdownModule()
@@ -56,20 +76,27 @@ void FUnrealDevMenuEditorModule::ShutdownModule()
 	// This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
 	// we call this function before unloading the module.
 
-	// Register asset types
-	IAssetTools& AssetTools =
-	    FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
+	{
+		// アセットタイプアクションをクリアする
+		IAssetTools& AssetTools =
+		    FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
 
-	AssetTools.UnregisterAssetTypeActions(Action.ToSharedRef());
-	Action = nullptr;
+		for ( TSharedPtr<IAssetTypeActions>& Action : CreatedAssetTypeActions )
+		{
+			AssetTools.UnregisterAssetTypeActions(Action.ToSharedRef());
+		}
+		CreatedAssetTypeActions.Empty();
+	}
 
-	FPropertyEditorModule& PropertyModule =
-	    FModuleManager::GetModuleChecked<FPropertyEditorModule>(
-	        TEXT("PropertyEditor"));
+	{
+		// 詳細タブ拡張を登録解除
+		FPropertyEditorModule& PropertyModule =
+		    FModuleManager::GetModuleChecked<FPropertyEditorModule>(
+		        TEXT("PropertyEditor"));
 
-	PropertyModule.UnregisterCustomPropertyTypeLayout(TEXT("DevMenuBinding"));
-
-	PropertyModule.UnregisterCustomClassLayout(TEXT("DevParamStructType"));
+		PropertyModule.UnregisterCustomPropertyTypeLayout(TEXT("DevMenuBinding"));
+		PropertyModule.UnregisterCustomClassLayout(TEXT("DevParamStructType"));
+	}
 }
 
 // クラスキャッシュを取得する

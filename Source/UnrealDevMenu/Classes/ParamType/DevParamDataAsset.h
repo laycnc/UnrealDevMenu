@@ -7,11 +7,10 @@
 class UDevParamType;
 #include "DevParamDataAsset.generated.h"
 
-
 /**
  * デバッグパラメータ定義アセット
  */
-UCLASS()
+UCLASS(MinimalAPI)
 class UDevParamDataAsset : public UDataAsset
 {
 	GENERATED_UCLASS_BODY()

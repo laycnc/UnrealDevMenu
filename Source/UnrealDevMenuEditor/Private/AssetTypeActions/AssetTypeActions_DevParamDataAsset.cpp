@@ -1,50 +1,58 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "AssetTypeActions_DevMenu.h"
-#include "DevMenu.h"
+#include "AssetTypeActions_DevParamDataAsset.h"
+#include "ParamType/DevParamDataAsset.h"
 #include "Editor/UnrealDevMenuEditor.h"
 
-#define LOCTEXT_NAMESPACE "FAssetTypeActions_DevMenu"
+#define LOCTEXT_NAMESPACE "FAssetTypeActions_DevParamDataAsset"
 
-FAssetTypeActions_DevMenu::FAssetTypeActions_DevMenu(uint32 InCategory)
+FAssetTypeActions_DevParamDataAsset::FAssetTypeActions_DevParamDataAsset(
+    uint32 InCategory)
     : FAssetTypeActions_Base()
     , Category(InCategory)
 {
 }
 
 // IAssetTypeActions Implementation
-FText FAssetTypeActions_DevMenu::GetName() const
+FText FAssetTypeActions_DevParamDataAsset::GetName() const
 {
-	return NSLOCTEXT("AssetTypeActions", "AssetTypeActions_DevMenu", "DevMenu");
+	return NSLOCTEXT("AssetTypeActions",
+	                 "AssetTypeActions_DevParamDataAsset:",
+	                 "DevParamDataAsset");
 }
-FColor FAssetTypeActions_DevMenu::GetTypeColor() const
+FColor FAssetTypeActions_DevParamDataAsset::GetTypeColor() const
 {
 	return FColor(255, 255, 255);
 }
-UClass* FAssetTypeActions_DevMenu::GetSupportedClass() const
+UClass* FAssetTypeActions_DevParamDataAsset::GetSupportedClass() const
 {
-	return UDevMenu::StaticClass();
+	return UDevParamDataAsset::StaticClass();
 }
 
-bool FAssetTypeActions_DevMenu::HasActions(const TArray<UObject*>& InObjects) const
+bool FAssetTypeActions_DevParamDataAsset::HasActions(
+    const TArray<UObject*>& InObjects) const
 {
 	return false;
 }
 
-void FAssetTypeActions_DevMenu::GetActions(const TArray<UObject*>&  InObjects,
-                                           struct FToolMenuSection& Section)
+void FAssetTypeActions_DevParamDataAsset::GetActions(
+    const TArray<UObject*>&  InObjects,
+    struct FToolMenuSection& Section)
 {
 }
 
-uint32 FAssetTypeActions_DevMenu::GetCategories()
+uint32 FAssetTypeActions_DevParamDataAsset::GetCategories()
 {
 	return Category;
 }
 
-void FAssetTypeActions_DevMenu::OpenAssetEditor(
+void FAssetTypeActions_DevParamDataAsset::OpenAssetEditor(
     const TArray<UObject*>&        InObjects,
     TSharedPtr<class IToolkitHost> EditWithinLevelEditor)
 {
+#if 1
+	FAssetTypeActions_Base::OpenAssetEditor(InObjects, EditWithinLevelEditor);
+#else
 	const EToolkitMode::Type Mode = EditWithinLevelEditor.IsValid()
 	                                    ? EToolkitMode::WorldCentric
 	                                    : EToolkitMode::Standalone;
@@ -78,6 +86,7 @@ void FAssetTypeActions_DevMenu::OpenAssetEditor(
 			    Mode, EditWithinLevelEditor, DevMenu);
 		}
 	}
+#endif
 }
 
 #undef LOCTEXT_NAMESPACE

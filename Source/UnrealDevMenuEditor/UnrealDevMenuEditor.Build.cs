@@ -46,6 +46,9 @@ public class UnrealDevMenuEditor : ModuleRules
                 "KismetWidgets",
                 "PropertyEditor",
                 "AIGraph",
+                "GameplayTags",
+                "Json",
+                "JsonUtilities",
                 "UnrealDevMenu",
                 "ImGui",
 				// ... add private dependencies that you statically link with here ...	

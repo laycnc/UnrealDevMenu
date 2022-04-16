@@ -8,12 +8,17 @@
 #include "ParamType/DevParamType_Name.h"
 #include "ParamType/DevParamType_String.h"
 #include "ParamType/DevParamType_Object.h"
+#include "ParamType/DevParamStructType.h"
 #include "ParamType/DevParamDataAsset.h"
 #include "Kismet/KismetStringLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Engine/Engine.h"
+#include "JsonObjectConverter.h"
+#include "DevMenuUtility.h"
 
 DEFINE_LOG_CATEGORY(LogDevMenuParam);
+
+#define LOCTEXT_NAMESPACE "UDevParamSubsystem"
 
 // デバッグパラメータサブシステムの取得
 UDevParamSubsystem* UDevParamSubsystem::Get(const UObject* InWorldContext)
@@ -22,12 +27,8 @@ UDevParamSubsystem* UDevParamSubsystem::Get(const UObject* InWorldContext)
 	    InWorldContext, EGetWorldErrorMode::ReturnNull);
 	if ( IsValid(World) )
 	{
-		if ( const UGameInstance* GameInstance = World->GetGameInstance() )
-		{
-			auto* Subsystem =
-			    GameInstance->GetSubsystemBase(UDevParamSubsystem::StaticClass());
-			return Cast<UDevParamSubsystem>(Subsystem);
-		}
+		auto* Subsystem = World->GetSubsystemBase(UDevParamSubsystem::StaticClass());
+		return Cast<UDevParamSubsystem>(Subsystem);
 	}
 	return nullptr;
 }
@@ -41,6 +42,9 @@ void UDevParamSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 void UDevParamSubsystem::Deinitialize()
 {
 	Super::Deinitialize();
+
+	// パラメータの終了処理を呼ぶ
+	FinalizeDevParam();
 }
 // USubsystem implementation End
 
@@ -106,11 +110,11 @@ void UDevParamSubsystem::SetValueByObject(FGameplayTag ParamId, UObject* NewValu
 }
 
 template<class T>
-void UDevParamSubsystem::SetPrimitiveValue(const FGameplayTag&    ParamId,
-                                           TMap<FGameplayTag, T>& TargetValues,
-                                           T                      NewValue)
+void UDevParamSubsystem::SetPrimitiveValue(const FGameplayTag& ParamId,
+                                           TMap<FName, T>&     TargetValues,
+                                           T                   NewValue)
 {
-	if ( T* Result = TargetValues.Find(ParamId) )
+	if ( T* Result = TargetValues.Find(ParamId.GetTagName()) )
 	{
 		(*Result) = NewValue;
 		OnChangedParam.Broadcast(ParamId);
@@ -171,15 +175,172 @@ void UDevParamSubsystem::GetValueByObject(FGameplayTag ParamId,
 	ResultValue = ResultObj.Get();
 }
 
-template<class T>
-void UDevParamSubsystem::GetPrimitiveValue(const FGameplayTag&          ParamId,
-                                           const TMap<FGameplayTag, T>& TargetValues,
-                                           T& ResultValue) const
+void UDevParamSubsystem::GetValueByStructInternal(
+    FGameplayTag              ParamId,
+    FDevParamStructDummyType& ResultValue) const
 {
-	if ( const T* Result = TargetValues.Find(ParamId) )
+	check(0);
+}
+
+void UDevParamSubsystem::GetValueByStruct_Impl(FName          ParamId,
+                                               UScriptStruct* ParamType,
+                                               void*          ResultValue) const
+{
+	const TMap<FName, TSharedPtr<FStructOnScope>>* StructValues =
+	    StructValueMap.Find(ParamType);
+
+	if ( StructValues == nullptr )
+	{
+		// 構造体が見つからなかった
+		FDevMenuUtility::MessageLog(
+		    this,
+		    FText::Format(LOCTEXT("GetValueByStruct_NotFoundStruct",
+		                          "NotFound ParamStruct: Struct={0} Tag={1}"),
+		                  FText::FromString(GetNameSafe(ParamType)),
+		                  FText::FromName(ParamId)));
+
+		return;
+	}
+
+	auto* Result = StructValues->Find(ParamId);
+
+	if ( Result == nullptr )
+	{
+		// GameplayTagが見つからなかった
+		FDevMenuUtility::MessageLog(
+		    this,
+		    FText::Format(LOCTEXT("GetValueByStruct_NotFoundParamId",
+		                          "NotFound ParamId: Struct={0} Tag={1}"),
+		                  FText::FromString(GetNameSafe(ParamType)),
+		                  FText::FromName(ParamId)));
+
+		return;
+	}
+
+	// 構造体をコピーをする
+	const uint8* StructMemory = (*Result)->GetStructMemory();
+	ParamType->CopyScriptStruct(ResultValue, StructMemory);
+}
+
+DEFINE_FUNCTION(UDevParamSubsystem::execGetValueByStructInternal)
+{
+	P_GET_STRUCT(FGameplayTag, Z_Param_ParamId);
+
+	Stack.StepCompiledIn<FStructProperty>(NULL);
+	void*            OutRowPtr = Stack.MostRecentPropertyAddress;
+	FStructProperty* StructProp =
+	    CastField<FStructProperty>(Stack.MostRecentProperty);
+
+	P_FINISH;
+	P_NATIVE_BEGIN;
+
+	UScriptStruct* ParamType = nullptr;
+	if ( StructProp )
+	{
+		ParamType = StructProp->Struct;
+	}
+
+	P_THIS->GetValueByStruct_Impl(
+	    Z_Param_ParamId.GetTagName(), ParamType, OutRowPtr);
+	P_NATIVE_END;
+}
+
+void UDevParamSubsystem::SetValueByStructInternal(
+    FGameplayTag                    ParamId,
+    const FDevParamStructDummyType& NewValue)
+{
+	check(0);
+}
+
+void UDevParamSubsystem::SetValueByStruct_Impl(FName          ParamId,
+                                               UScriptStruct* ParamType,
+                                               const void*    NewValue) const
+{
+	const TMap<FName, TSharedPtr<FStructOnScope>>* StructValues =
+	    StructValueMap.Find(ParamType);
+
+	if ( StructValues == nullptr )
+	{
+		// 構造体が見つからなかった
+		FDevMenuUtility::MessageLog(
+		    this,
+		    FText::Format(LOCTEXT("SetValueByStruct_NotFoundStruct",
+		                          "NotFound ParamStruct: Struct={0} Tag={1}"),
+		                  FText::FromString(GetNameSafe(ParamType)),
+		                  FText::FromName(ParamId)));
+
+		return;
+	}
+
+	auto* Result = StructValues->Find(ParamId);
+
+	if ( Result == nullptr )
+	{
+		// GameplayTagが見つからなかった
+		FDevMenuUtility::MessageLog(
+		    this,
+		    FText::Format(LOCTEXT("SetValueByStruct_NotFoundParamId",
+		                          "NotFound ParamId: Struct={0} Tag={1}"),
+		                  FText::FromString(GetNameSafe(ParamType)),
+		                  FText::FromName(ParamId)));
+
+		return;
+	}
+
+	// 構造体をコピーをする
+	uint8* StructMemory = (*Result)->GetStructMemory();
+	ParamType->CopyScriptStruct(StructMemory, NewValue);
+}
+
+DEFINE_FUNCTION(UDevParamSubsystem::execSetValueByStructInternal)
+{
+	P_GET_STRUCT(FGameplayTag, Z_Param_ParamId);
+
+	Stack.StepCompiledIn<FStructProperty>(NULL);
+	void*            OutRowPtr = Stack.MostRecentPropertyAddress;
+	FStructProperty* StructProp =
+	    CastField<FStructProperty>(Stack.MostRecentProperty);
+
+	P_FINISH;
+	P_NATIVE_BEGIN;
+
+	UScriptStruct* ParamType = nullptr;
+	if ( StructProp )
+	{
+		ParamType = StructProp->Struct;
+	}
+
+	P_THIS->SetValueByStruct_Impl(
+	    Z_Param_ParamId.GetTagName(), ParamType, OutRowPtr);
+	P_NATIVE_END;
+}
+
+template<class T>
+void UDevParamSubsystem::GetPrimitiveValue(const FGameplayTag&   ParamId,
+                                           const TMap<FName, T>& TargetValues,
+                                           T&                    ResultValue) const
+{
+	if ( const T* Result = TargetValues.Find(ParamId.GetTagName()) )
 	{
 		ResultValue = *Result;
 	}
+}
+
+void UDevParamSubsystem::RegisterStructParam(FName          ParamId,
+                                             UScriptStruct* ParamType,
+                                             const void*    NewValue)
+{
+	TMap<FName, TSharedPtr<FStructOnScope>>& StructValue =
+	    StructValueMap.FindOrAdd(ParamType);
+
+	TSharedPtr<FStructOnScope> NewStruct =
+	    MakeShareable(new FStructOnScope(ParamType));
+
+	// コピーする
+	ParamType->CopyScriptStruct(NewStruct->GetStructMemory(), NewValue);
+
+	// 成功したのでリストに追加する
+	StructValue.Emplace(ParamId, NewStruct);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -238,16 +399,27 @@ void UDevParamSubsystem::PrintValue() const
 	PrintPrimitiveValue(StringValues);
 	PrintPrimitiveValue(ObjectValues);
 
-	for ( auto& StructPair : StructValues )
+	for ( auto& StructPair : StructValueMap )
 	{
-		const TObjectPtr<UStruct>&                Type        = StructPair.Key;
-		const TMap<FGameplayTag, FStructOnScope>& StructLists = StructPair.Value;
+		const TObjectPtr<UStruct>& StructType  = StructPair.Key;
+		const auto&                StructValue = StructPair.Value;
 
-		for ( const auto& Pair : StructLists )
+		for ( const auto& Pair : StructValue )
 		{
-			const FGameplayTag&   Tag   = Pair.Key;
-			const FStructOnScope& Value = Pair.Value;
+			const FName&                      Tag   = Pair.Key;
+			const TSharedPtr<FStructOnScope>& Value = Pair.Value;
+			const uint8* StructMemory               = Value->GetStructMemory();
 
+			FString JsonString;
+			if ( FJsonObjectConverter::UStructToJsonObjectString(
+			         StructType, StructMemory, JsonString) )
+			{
+				JsonString = JsonString.Replace(TEXT("\r\n"), TEXT(""));
+				UKismetSystemLibrary::PrintString(
+				    this,
+				    FString::Printf(
+				        TEXT("Tag = %s, Value = %s"), *Tag.ToString(), *JsonString));
+			}
 			// todo
 		}
 	}
@@ -255,12 +427,12 @@ void UDevParamSubsystem::PrintValue() const
 
 template<class T>
 void UDevParamSubsystem::PrintPrimitiveValue(
-    const TMap<FGameplayTag, T>& TargetValues) const
+    const TMap<FName, T>& TargetValues) const
 {
 	for ( auto& Pair : TargetValues )
 	{
-		const FGameplayTag& Tag   = Pair.Key;
-		const T&            Value = Pair.Value;
+		const FName& Tag   = Pair.Key;
+		const T&     Value = Pair.Value;
 
 		UKismetSystemLibrary::PrintString(
 		    this,
@@ -277,41 +449,76 @@ void UDevParamSubsystem::PrintPrimitiveValue(
 // 値の追加
 void UDevParamSubsystem::AddValues(UDevParamType* ParamType)
 {
+	FName ParamId = ParamType->ParamId.GetTagName();
+
 	// 構造体の生成の場合
 	if ( auto* ParamType_Bool = Cast<UDevParamType_Bool>(ParamType) )
 	{
-		bool& NewValue = BoolValues.Emplace(ParamType_Bool->ParamId);
+		bool& NewValue = BoolValues.Emplace(ParamId);
 		ParamType_Bool->InitializeValue(&NewValue);
 	}
 	else if ( auto* ParamType_Int32 = Cast<UDevParamType_Int32>(ParamType) )
 	{
-		int32& NewValue = Int32Values.Emplace(ParamType_Int32->ParamId);
+		int32& NewValue = Int32Values.Emplace(ParamId);
 		ParamType_Int32->InitializeValue(&NewValue);
 	}
 	else if ( auto* ParamType_Float = Cast<UDevParamType_Float>(ParamType) )
 	{
-		float& NewValue = FloatValues.Emplace(ParamType_Float->ParamId);
+		float& NewValue = FloatValues.Emplace(ParamId);
 		ParamType_Float->InitializeValue(&NewValue);
 	}
 	else if ( auto* ParamType_Double = Cast<UDevParamType_Double>(ParamType) )
 	{
-		double& NewValue = DoubleValues.Emplace(ParamType_Double->ParamId);
+		double& NewValue = DoubleValues.Emplace(ParamId);
 		ParamType_Double->InitializeValue(&NewValue);
 	}
 	else if ( auto* ParamType_Name = Cast<UDevParamType_Name>(ParamType) )
 	{
-		FName& NewValue = NameValues.Emplace(ParamType_Name->ParamId);
+		FName& NewValue = NameValues.Emplace(ParamId);
 		ParamType_Name->InitializeValue(&NewValue);
 	}
 	else if ( auto* ParamType_String = Cast<UDevParamType_String>(ParamType) )
 	{
-		FString& NewValue = StringValues.Emplace(ParamType_String->ParamId);
+		FString& NewValue = StringValues.Emplace(ParamId);
 		ParamType_String->InitializeValue(&NewValue);
 	}
 	else if ( auto* ParamType_Object = Cast<UDevParamType_Object>(ParamType) )
 	{
-		TWeakObjectPtr<UObject>& NewValue =
-		    ObjectValues.Emplace(ParamType_Object->ParamId);
+		TWeakObjectPtr<UObject>& NewValue = ObjectValues.Emplace(ParamId);
 		ParamType_Object->InitializeValue(&NewValue);
 	}
+	else if ( auto* ParamType_Struct = Cast<UDevParamStructType>(ParamType) )
+	{
+		// 構造体の場合
+		UStruct* StructType = ParamType_Struct->GetTargetStructType();
+
+		TMap<FName, TSharedPtr<FStructOnScope>>& StructValue =
+		    StructValueMap.FindOrAdd(StructType);
+
+		FStructOnScope NewStructValue(StructType);
+
+		if ( ParamType_Struct->InitializeValue(NewStructValue.GetStructMemory()) )
+		{
+			// 成功したのでリストに追加する
+			StructValue.Emplace(
+			    ParamId,
+			    MakeShareable(new FStructOnScope(std::move(NewStructValue))));
+		}
+	}
 }
+
+// パラメータの終了処理
+void UDevParamSubsystem::FinalizeDevParam()
+{
+
+	BoolValues.Empty();
+	Int32Values.Empty();
+	FloatValues.Empty();
+	DoubleValues.Empty();
+	NameValues.Empty();
+	StringValues.Empty();
+	ObjectValues.Empty();
+	StructValueMap.Empty();
+}
+
+#undef LOCTEXT_NAMESPACE

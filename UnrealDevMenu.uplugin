@@ -25,6 +25,11 @@
       "Type": "Editor",
       "LoadingPhase": "PostEngineInit"
     },
+    {
+      "Name": "UnrealDevMenuNode",
+      "Type": "UncookedOnly",
+      "LoadingPhase": "Default"
+    },
   ],
   "Plugins": [
     {

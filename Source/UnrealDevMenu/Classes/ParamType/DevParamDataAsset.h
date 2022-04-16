@@ -17,6 +17,6 @@ class UDevParamDataAsset : public UDataAsset
 
 public:
 	// パラメータ
-	UPROPERTY(EditAnywhere, Instanced, Category = "DevMenu")
+	UPROPERTY(EditAnywhere, Category = "DevMenu")
 	TArray<TObjectPtr<UDevParamType>> Params;
 };

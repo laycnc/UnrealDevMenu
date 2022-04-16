@@ -14,32 +14,28 @@ class UNREALDEVMENU_API UDevParamStructType : public UDevParamType
 {
 	GENERATED_UCLASS_BODY()
 
-protected:
-	UDevParamStructType(const FObjectInitializer& ObjectInitializer,
-	                       UScriptStruct*            InStructType);
-
-
 public:
-	//~ Begin UObject Interface.
-	virtual void FinishDestroy() override;
-	virtual void Serialize(FStructuredArchiveRecord Record) override;
-	virtual void PostLoad() override;
-	//~ End UObject Interface
-
-	const TSharedPtr<FStructOnScope>& GetDefaultValue() const;
+	virtual bool   InitializeValue(void* Dest) const;
+	virtual void   DestroyValue(void* Dest) const;
+	UScriptStruct* GetTargetStructType() const;
 
 protected:
-	// 構造体をプリロードする
-	void PreloadStructType();
+#if WITH_EDITOR
+	// エディター用
+	// DevParamエディター内の表に表示されるパラメータ値
+	virtual FText GetDefaultValueExtension() const override final;
+	virtual bool  CanEditChange(const FProperty* InProperty) const override;
+#endif
 
-	void CreateStruct();
-	void DestoryStruct();
+	// デフォルト値の値を取得する
+	bool GetDefaultValuePtr(const uint8*& OutStructMemory) const;
 
 protected:
 	// 対応する構造体
 	UPROPERTY(EditDefaultsOnly, Category = "DevMenu")
 	TObjectPtr<UScriptStruct> StructType;
 
-	// 構造体データ
-	TSharedPtr<FStructOnScope> DefaultValue;
+	// デフォルト値を設定する為のプロパティ名
+	UPROPERTY(EditDefaultsOnly, Category = "DevMenu")
+	FName DefaultValuePropertyName;
 };

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Subsystems/GameInstanceSubsystem.h"
+#include "Subsystems/WorldSubsystem.h"
 #include "GameplayTagsManager.h"
 class UDevParamType;
 class UDevParamDataAsset;
@@ -15,11 +15,17 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnChangedDevMenuParam,
                                             FGameplayTag,
                                             ParamId);
 
+USTRUCT(BlueprintType)
+struct FDevParamStructDummyType
+{
+	GENERATED_BODY()
+};
+
 /**
  * 
  */
 UCLASS(MinimalAPI)
-class UDevParamSubsystem : public UGameInstanceSubsystem
+class UDevParamSubsystem : public UWorldSubsystem
 {
 	GENERATED_BODY()
 
@@ -193,45 +199,125 @@ public:
 	UNREALDEVMENU_API void GetValueByObject(FGameplayTag ParamId,
 	                                        UObject*&    ResultValue) const;
 
+	/**
+     * 構造体のパラメータを取得する
+     */
+	UFUNCTION(BlueprintPure,
+	          CustomThunk,
+	          meta     = (Categories           = "DevMenuParam",
+                      CustomStructureParam = "ResultValue"),
+	          Category = "DevMenu|Paramer")
+	void GetValueByStructInternal(FGameplayTag              ParamId,
+	                              FDevParamStructDummyType& ResultValue) const;
+
+	UNREALDEVMENU_API void GetValueByStruct_Impl(FName          ParamId,
+	                                             UScriptStruct* ParamType,
+	                                             void*          ResultValue) const;
+
+	template<class T>
+	void GetValueByStruct(FName ParamId, T& NewValue) const
+	{
+		GetValueByStruct_Impl(ParamId, T::StaticStruct(), &NewValue);
+	}
+
+	template<class T>
+	void GetValueByStruct(FGameplayTag ParamId, T& NewValue) const
+	{
+		GetValueByStruct_Impl(ParamId.GetTagName(), T::StaticStruct(), &NewValue);
+	}
+
+	DECLARE_FUNCTION(execGetValueByStructInternal);
+
+	/**
+     * 構造体のパラメータを取得する
+     */
+	UFUNCTION(BlueprintCallable,
+	          CustomThunk,
+	          meta     = (Categories           = "DevMenuParam",
+                      CustomStructureParam = "NewValue"),
+	          Category = "DevMenu|Paramer")
+	void SetValueByStructInternal(FGameplayTag                    ParamId,
+	                              const FDevParamStructDummyType& NewValue);
+
+	UNREALDEVMENU_API void SetValueByStruct_Impl(FName          ParamId,
+	                                             UScriptStruct* ParamType,
+	                                             const void*    ResultValue) const;
+
+	template<class T>
+	void SetValueByStruct(FName ParamId, const T& NewValue)
+	{
+		SetValueByStruct_Impl(ParamId, T::StaticStruct(), &NewValue);
+	}
+
+	template<class T>
+	void SetValueByStruct(FGameplayTag ParamId, const T& NewValue)
+	{
+		SetValueByStruct_Impl(ParamId.GetTagName(), T::StaticStruct(), &NewValue);
+	}
+
+	DECLARE_FUNCTION(execSetValueByStructInternal);
+
+	UNREALDEVMENU_API void RegisterStructParam(FName          ParamId,
+	                                           UScriptStruct* ParamType,
+	                                           const void*    NewValue);
+
+	template<class T>
+	void RegisterStructParam(FName ParamId, const T& NewValue)
+	{
+		RegisterStructParam(ParamId, T::StaticStruct(), &NewValue);
+	}
+
+	template<class T>
+	void RegisterStructParam(FGameplayTag ParamId, const T& NewValue)
+	{
+		RegisterStructParam(ParamId.GetTagName(), T::StaticStruct(), &NewValue);
+	}
+
 	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "DevMenu|Paramer")
 	void PrintValue() const;
 
 private:
 	template<class T>
-	void SetPrimitiveValue(const FGameplayTag&    ParamId,
-	                       TMap<FGameplayTag, T>& TargetValues,
-	                       T                      NewValue);
+	void SetPrimitiveValue(const FGameplayTag& ParamId,
+	                       TMap<FName, T>&     TargetValues,
+	                       T                   NewValue);
 
 	template<class T>
-	void GetPrimitiveValue(const FGameplayTag&          ParamId,
-	                       const TMap<FGameplayTag, T>& TargetValues,
-	                       T&                           ResultValue) const;
+	void GetPrimitiveValue(const FGameplayTag&   ParamId,
+	                       const TMap<FName, T>& TargetValues,
+	                       T&                    ResultValue) const;
 
 	template<class T>
-	void PrintPrimitiveValue(const TMap<FGameplayTag, T>& TargetValues) const;
+	void PrintPrimitiveValue(const TMap<FName, T>& TargetValues) const;
 
 	// 値の追加
 	void AddValues(UDevParamType* ParamType);
 
+	// パラメータの終了処理
+	void FinalizeDevParam();
 
 private:
+	// デバッグパラメータの値の管理
+	// 管理方法は後日調整を行う
+
 	UPROPERTY(Transient)
-	TMap<FGameplayTag, bool> BoolValues;
+	TMap<FName, bool> BoolValues;
 	UPROPERTY(Transient)
-	TMap<FGameplayTag, int32> Int32Values;
+	TMap<FName, int32> Int32Values;
 	UPROPERTY(Transient)
-	TMap<FGameplayTag, float> FloatValues;
+	TMap<FName, float> FloatValues;
 	UPROPERTY(Transient)
-	TMap<FGameplayTag, double> DoubleValues;
+	TMap<FName, double> DoubleValues;
 	UPROPERTY(Transient)
-	TMap<FGameplayTag, FName> NameValues;
+	TMap<FName, FName> NameValues;
 	UPROPERTY(Transient)
-	TMap<FGameplayTag, FString> StringValues;
+	TMap<FName, FString> StringValues;
 	UPROPERTY(Transient)
-	TMap<FGameplayTag, TWeakObjectPtr<UObject>> ObjectValues;
+	TMap<FName, TWeakObjectPtr<UObject>> ObjectValues;
 
 	// 構造体の特殊化
-	TMap<TObjectPtr<UStruct>, TMap<FGameplayTag, FStructOnScope>> StructValues;
+	TMap<TObjectPtr<UStruct>, TMap<FName, TSharedPtr<FStructOnScope>>>
+	    StructValueMap;
 
 	UPROPERTY(Transient)
 	UDevParamDataAsset* DataAsset = nullptr;

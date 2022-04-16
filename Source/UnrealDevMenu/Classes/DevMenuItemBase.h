@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "DevMenuItemInterface.h"
+class UDevMenu;
 class UDevMenuSubsystem;
 #include "DevMenuItemBase.generated.h"
 

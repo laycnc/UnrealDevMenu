@@ -8,19 +8,19 @@
 class UDevMenu;
 #include "DevMenuSubsystem.generated.h"
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FDevMenuSubWindowInfo
 {
 	GENERATED_BODY();
 public:
 	// window location
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector2D Position;
 	// window size
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FVector2D Size;
 	// window visible
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bVisible;
 };
 
@@ -50,8 +50,6 @@ public:
 	UNREALDEVMENU_API void InitializeMenu(UDevMenu* InMenuAsset);
 
 	void RegisterWindow(const UDevMenu& InWindowDevMenu);
-
-	FDevMenuSubWindowInfo* GetWindowVariable(FName Id);
 private:
 	void ImGuiTick();
 
@@ -63,8 +61,4 @@ private:
 	// Window DebugMenu
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<const UDevMenu>> WindowDevMenus;
-
-	// DevMenuの値
-	UPROPERTY(Transient)
-	TMap<FName, FDevMenuSubWindowInfo> WindowVariables;
 };

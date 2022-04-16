@@ -6,11 +6,15 @@
 #include "Input/Reply.h"
 #include "UObject/GCObject.h"
 #include "EditorUndoClient.h"
+#include "AIGraphTypes.h"
 #include "Framework/Docking/TabManager.h"
 #include "WorkflowOrientedApp/WorkflowCentricApplication.h"
+#include "DevParamEditorDefine.h"
 
 class IDetailsView;
 class UDevParamDataAsset;
+
+DECLARE_MULTICAST_DELEGATE(FOnChangedDevParamDataAsset);
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -86,23 +90,38 @@ public:
 
 	TSharedRef<FUICommandList> GetHierarchyCommandList() const;
 
-	DECLARE_MULTICAST_DELEGATE(FOnChangedMenu);
+	FSlateColor GetDevParamColor(TWeakObjectPtr<UDevParamType> ViewParamType) const;
+	void        SetSelectItem(TWeakObjectPtr<UDevParamType> NewSelectedItem);
+	UDevParamType* GetSelectItem() const;
+
+	DECLARE_MULTICAST_DELEGATE(FOnChangedDevParam);
 
 	// メニューが更新された
-	FOnChangedMenu OnChangedMenu;
+	FOnChangedDevParam OnChangedDevParam;
+
+	// 変更された
+	FOnChangedDevParamDataAsset OnChangedDevParamAsset;
 
 public:
 	TSharedRef<SWidget> SpawnDetails();
 	void                OnChangeHierarchyItem(UObject* NewObject);
 
-    void OnAddClicked();
 
 private:
 	// 拡張ツールバー
 	void ExtendToolbar(TSharedPtr<FExtender> Extender);
-    // ツールバーを拡張分で埋める
+	// ツールバーを拡張分で埋める
 	void FillToolbar(FToolBarBuilder& ToolbarBuilder);
 	void GeneratedMenuItemClasses();
+	// DevParam追加メニューを作成する
+	TSharedRef<SWidget> GenAddDevParamMenuCategory();
+	// DevParam追加メニューを作成する
+	void GenAddDevParamMenu(FMenuBuilder& MenuBuilder, FString Category);
+	// DevParam追加メニューを作成する
+	void AddDevParamMenu(FGraphNodeClassData NewDevParamClassData);
+
+	void OnRemoveClicked();
+	bool CanEditDevParam() const;
 
 	//////////////////////////////////////////////////////////////////////////
 	// Commands
@@ -111,11 +130,15 @@ private:
 	void InitializeCommands();
 
 private:
-	UDevParamDataAsset* DevParamDataAssetEdited = nullptr;
+	UDevParamDataAsset*           DevParamDataAssetEdited = nullptr;
+	TWeakObjectPtr<UDevParamType> SelectedItem            = nullptr;
 
 	/** The details view we use to display the blackboard */
 	TSharedPtr<IDetailsView> DetailsView;
 
 	// Hierarchyのコマンドリスト
 	TSharedPtr<FUICommandList> HierarchyCommandList;
+
+	// 詳細タブがロックされている
+	bool bIsLockDetails = false;
 };

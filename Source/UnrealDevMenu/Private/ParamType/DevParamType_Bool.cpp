@@ -2,8 +2,7 @@
 
 #include "ParamType/DevParamType_Bool.h"
 
-UDevParamType_Bool::UDevParamType_Bool(
-    const FObjectInitializer& ObjectInitializer)
+UDevParamType_Bool::UDevParamType_Bool(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
     , bDefaultValue(false)
 {
@@ -21,3 +20,14 @@ void UDevParamType_Bool::DestroyValue(void* Dest) const
 {
 	(void)Dest;
 }
+
+#if WITH_EDITOR
+
+// エディター用
+// DevParamエディター内の表に表示されるパラメータ値
+FText UDevParamType_Bool::GetDefaultValueExtension() const
+{
+	return FText::FromString(LexToString(bDefaultValue));
+}
+
+#endif

@@ -10,14 +10,24 @@
 /**
  * 
  */
-UCLASS(Abstract,
+UCLASS(MinimalAPI,
+       Abstract,
        NotBlueprintable,
        NotBlueprintType,
        editinlinenew,
        collapseCategories)
-class UNREALDEVMENU_API UDevParamType : public UObject
+class UDevParamType : public UObject
 {
 	GENERATED_UCLASS_BODY()
+
+public:
+#if WITH_EDITOR
+
+	// エディター用
+	// DevParamエディター内の表に表示されるパラメータ値
+	virtual FText GetDefaultValueExtension() const;
+
+#endif
 
 public:
 	// パラメータ
@@ -25,4 +35,8 @@ public:
 	          meta     = (Categories = "DevMenuParam"),
 	          Category = "DevMenu")
 	FGameplayTag ParamId;
+
+	// パラメータを保存するか？
+	UPROPERTY(EditAnywhere, Category = "DevMenu")
+	bool bSaveParam;
 };

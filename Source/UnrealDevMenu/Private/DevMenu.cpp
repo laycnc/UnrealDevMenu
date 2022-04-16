@@ -4,6 +4,7 @@
 #include "DevMenuItemBase.h"
 #include "DevMenuInstanceBase.h"
 #include "DevMenuSubsystem.h"
+#include "DevParamSubsystem.h"
 
 #define LOCTEXT_NAMESPACE "UDevMenu"
 
@@ -12,6 +13,12 @@ UDevMenu::UDevMenu(const FObjectInitializer& ObjectInitializer)
     , ShowWindowLabel(LOCTEXT("UDevMenu_ShowWindowLabel", "Show Window"))
     , ShowWindowTooltip(LOCTEXT("UDevMenu_ShowWindowTooltip", "switch Show Window"))
 {
+}
+
+// ウインドウ情報のIDを取得する
+FName UDevMenu::GetWindowInfoParamId() const
+{
+	return FName(*FString::Printf(TEXT("DevMenuWindow.%s"), *Id.ToString()));
 }
 
 // 実行用のインスタンスを作成する
@@ -54,14 +61,20 @@ void UDevMenu::UpdateGroupMenu(UDevMenuSubsystem& InSubsystem) const
 		// ウインドウの表示切り替えをグループ側で出来るようにする
 		if ( bWindow )
 		{
-			FDevMenuSubWindowInfo* WindowInfo = InSubsystem.GetWindowVariable(Id);
+			UDevParamSubsystem* DevParam = UDevParamSubsystem::Get(&InSubsystem);
 
-			bool bShowWindow = WindowInfo->bVisible;
+			FDevMenuSubWindowInfo WindowInfo        = {};
+			FName                 WindowInfoParamId = GetWindowInfoParamId();
+			DevParam->GetValueByStruct(WindowInfoParamId, WindowInfo);
+
+			bool bShowWindow = WindowInfo.bVisible;
 			if ( ImGui::Checkbox(TCHAR_TO_UTF8(*ShowWindowLabel.ToString()),
 			                     &bShowWindow) )
 			{
 				// 表示状態が切り替わった
-				WindowInfo->bVisible = bShowWindow;
+				WindowInfo.bVisible = bShowWindow;
+
+				DevParam->SetValueByStruct(WindowInfoParamId, WindowInfo);
 			}
 
 			if ( ImGui::IsItemHovered() )
@@ -81,10 +94,17 @@ void UDevMenu::UpdateGroupMenu(UDevMenuSubsystem& InSubsystem) const
 }
 
 // メニューウインドウの表示
-void UDevMenu::UpdateMenuWindow(UDevMenuSubsystem&     InSubsystem,
-                                FDevMenuSubWindowInfo& WindowInfo) const
+void UDevMenu::UpdateMenuWindow(UDevMenuSubsystem& InSubsystem) const
 {
 #if WITH_IMGUI
+
+	UDevParamSubsystem* DevParam = UDevParamSubsystem::Get(&InSubsystem);
+
+	FDevMenuSubWindowInfo WindowInfo        = {};
+	FName                 WindowInfoParamId = GetWindowInfoParamId();
+	bool                  bChangedValue     = false;
+
+	DevParam->GetValueByStruct(WindowInfoParamId, WindowInfo);
 
 	if ( !WindowInfo.bVisible )
 	{
@@ -144,6 +164,13 @@ void UDevMenu::UpdateMenuWindow(UDevMenuSubsystem&     InSubsystem,
 			WindowInfo.Size.Y = NewWindowSize.y;
 		}
 	}
+
+	if ( bChangedValue )
+	{
+		// 値が変更されたのでパラメータを設定する
+		DevParam->SetValueByStruct(WindowInfoParamId, WindowInfo);
+	}
+
 #endif // WITH_IMGUI
 }
 

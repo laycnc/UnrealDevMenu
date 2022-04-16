@@ -11,8 +11,10 @@ struct FGraphNodeClassHelper;
 class IUnrealDevMenuEditorModule : public IModuleInterface
 {
 public:
-	// クラスキャッシュを取得する
+	// メニューアイテムクラスキャッシュを取得する
 	virtual TSharedRef<FGraphNodeClassHelper> GetMenuItemClassCache() = 0;
+	// DevParamクラスキャッシュを取得する
+	virtual TSharedRef<FGraphNodeClassHelper> GetDevParamClassCache() = 0;
 	virtual TSharedPtr<FExtensibilityManager> GetToolBarExtensibilityManager()
 	    const = 0;
 };

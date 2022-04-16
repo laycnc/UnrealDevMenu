@@ -5,10 +5,10 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 #include "DevMenuItemInterface.h"
+#include "GameplayTagContainer.h"
 class UDevMenuItemBase;
 class UDevMenuInstanceBase;
 class UDevMenuSubsystem;
-struct FDevMenuSubWindowInfo;
 #include "DevMenu.generated.h"
 
 /**
@@ -23,6 +23,9 @@ class UNREALDEVMENU_API UDevMenu
 
 
 public:
+	// ウインドウ情報のIDを取得する
+	FName GetWindowInfoParamId() const;
+
 	// 実行用のインスタンスを作成する
 	void GeneratedInstance(UDevMenuSubsystem& Subsystem) const;
 
@@ -32,8 +35,7 @@ public:
 	void UpdateGroupMenu(UDevMenuSubsystem& InSubsystem) const;
 
 	// メニューウインドウの表示
-	void UpdateMenuWindow(UDevMenuSubsystem&     InSubsystem,
-	                      FDevMenuSubWindowInfo& WindowInfo) const;
+	void UpdateMenuWindow(UDevMenuSubsystem& InSubsystem) const;
 
 	// 子階層を取得する
 	void GetChildren(TArray<UDevMenuItemBase*>& OutChildren) const;
@@ -67,7 +69,7 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	bool bWindow;
 
-    // メニューに配置されている要素
+	// メニューに配置されている要素
 	UPROPERTY(VisibleDefaultsOnly, Instanced, AdvancedDisplay)
 	TArray<TObjectPtr<UDevMenuItemBase>> Items;
 

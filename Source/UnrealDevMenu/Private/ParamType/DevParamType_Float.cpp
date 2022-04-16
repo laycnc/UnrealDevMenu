@@ -2,8 +2,7 @@
 
 #include "ParamType/DevParamType_Float.h"
 
-UDevParamType_Float::UDevParamType_Float(
-    const FObjectInitializer& ObjectInitializer)
+UDevParamType_Float::UDevParamType_Float(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
     , DefaultValue(0)
 {
@@ -21,3 +20,14 @@ void UDevParamType_Float::DestroyValue(void* Dest) const
 {
 	(void)Dest;
 }
+
+#if WITH_EDITOR
+
+// エディター用
+// DevParamエディター内の表に表示されるパラメータ値
+FText UDevParamType_Float::GetDefaultValueExtension() const
+{
+	return FText::AsNumber(DefaultValue);
+}
+
+#endif

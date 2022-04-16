@@ -7,8 +7,9 @@
 #include "AssetTypeActions/AssetTypeActions_DevMenu.h"
 #include "AssetTypeActions/AssetTypeActions_DevParamDataAsset.h"
 #include "Details/DevMenuBindingDetails.h"
-#include "Details/DevParamStructTypeDetails.h"
 #include "AIGraphTypes.h"
+#include "ParamType/DevParamType.h"
+#include "DevMenuItemBase.h"
 
 #define LOCTEXT_NAMESPACE "FDevMenuModule"
 
@@ -19,14 +20,18 @@ public:
 	virtual void StartupModule() override;
 	virtual void ShutdownModule() override;
 
-	// クラスキャッシュを取得する
+	// メニューアイテムクラスキャッシュを取得する
 	virtual TSharedRef<FGraphNodeClassHelper> GetMenuItemClassCache() override;
+	// DevParamクラスキャッシュを取得する
+	virtual TSharedRef<FGraphNodeClassHelper> GetDevParamClassCache() override;
 	virtual TSharedPtr<FExtensibilityManager> GetToolBarExtensibilityManager()
 	    const override;
 private:
 	TArray<TSharedPtr<IAssetTypeActions>> CreatedAssetTypeActions;
 	// クラスキャッシュノード
 	TSharedPtr<FGraphNodeClassHelper> ClassCache;
+	// クラスキャッシュノード
+	TSharedPtr<FGraphNodeClassHelper> DevParamClassCache;
 
 	TSharedPtr<FExtensibilityManager> ToolBarExtensibilityManager;
 
@@ -63,11 +68,6 @@ void FUnrealDevMenuEditorModule::StartupModule()
 		FPropertyEditorModule& PropertyModule =
 		    FModuleManager::GetModuleChecked<FPropertyEditorModule>(
 		        TEXT("PropertyEditor"));
-
-		PropertyModule.RegisterCustomClassLayout(
-		    TEXT("DevParamStructType"),
-		    FOnGetDetailCustomizationInstance::CreateStatic(
-		        &FDevParamStructTypeCustomization::MakeInstance));
 
 		PropertyModule.RegisterCustomPropertyTypeLayout(
 		    TEXT("DevMenuBinding"),
@@ -114,10 +114,24 @@ TSharedRef<FGraphNodeClassHelper> FUnrealDevMenuEditorModule::GetMenuItemClassCa
 		// 初回呼び出しの時にクラスキャッシュを作成する
 		ClassCache = MakeShareable(
 		    new FGraphNodeClassHelper(UDevMenuItemBase::StaticClass()));
-		ClassCache->UpdateAvailableBlueprintClasses();
 	}
+	ClassCache->UpdateAvailableBlueprintClasses();
 
 	return ClassCache.ToSharedRef();
+}
+
+// DevParamクラスキャッシュを取得する
+TSharedRef<FGraphNodeClassHelper> FUnrealDevMenuEditorModule::GetDevParamClassCache()
+{
+	if ( !DevParamClassCache.IsValid() )
+	{
+		// 初回呼び出しの時にクラスキャッシュを作成する
+		DevParamClassCache =
+		    MakeShareable(new FGraphNodeClassHelper(UDevParamType::StaticClass()));
+	}
+	DevParamClassCache->UpdateAvailableBlueprintClasses();
+
+	return DevParamClassCache.ToSharedRef();
 }
 
 TSharedPtr<FExtensibilityManager> FUnrealDevMenuEditorModule::

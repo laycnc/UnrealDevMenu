@@ -21,3 +21,14 @@ void UDevParamType_String::DestroyValue(void* Dest) const
 {
 	(void)Dest;
 }
+
+#if WITH_EDITOR
+
+// エディター用
+// DevParamエディター内の表に表示されるパラメータ値
+FText UDevParamType_String::GetDefaultValueExtension() const
+{
+	return FText::FromString(DefaultValue);
+}
+
+#endif

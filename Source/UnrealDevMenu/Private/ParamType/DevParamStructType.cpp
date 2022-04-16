@@ -1,98 +1,137 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "ParamType/DevParamStructType.h"
+#include "JsonObjectConverter.h"
+#include "DevMenuUtility.h"
+#include "ParamType/DevParamDataAsset.h"
 
-UDevParamStructType::UDevParamStructType(
-    const FObjectInitializer& ObjectInitializer)
-    : UDevParamStructType(ObjectInitializer, nullptr)
-{
-}
+#define LOCTEXT_NAMESPACE "UDevParamStructType"
 
-UDevParamStructType::UDevParamStructType(
-    const FObjectInitializer& ObjectInitializer,
-    UScriptStruct*            InStructType)
+UDevParamStructType::UDevParamStructType(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer)
-    , StructType(InStructType)
 {
-	CreateStruct();
 }
 
-//~ Begin UObject Interface.
-
-void UDevParamStructType::FinishDestroy()
+bool UDevParamStructType::InitializeValue(void* Dest) const
 {
-	Super::FinishDestroy();
-
-	DefaultValue = nullptr;
-}
-
-void UDevParamStructType::Serialize(FStructuredArchiveRecord Record)
-{
-	FArchive& BaseArchive = Record.GetUnderlyingArchive();
-
-	Super::Serialize(Record);
-
-	PreloadStructType();
-
-	if ( BaseArchive.IsLoading() )
+	const uint8* StructMemory = nullptr;
+	if ( GetDefaultValuePtr(StructMemory) )
 	{
-		//
-		DestoryStruct();
-		CreateStruct();
+		// 構造体の初期化を行う
+		StructType->InitializeStruct(Dest);
+
+		// デフォルト値で初期化する
+		StructType->CopyScriptStruct(Dest, StructMemory);
+
+		return true;
 	}
+	return false;
+}
 
-	if ( BaseArchive.IsLoading() || BaseArchive.IsSaving() )
+void UDevParamStructType::DestroyValue(void* Dest) const
+{
+	if ( StructType && Dest )
 	{
-		FStructuredArchiveSlot StructDataSlot =
-		    Record.EnterField(SA_FIELD_NAME(TEXT("StructData")));
+		// 構造体を破棄する
+		StructType->DestroyStruct(Dest);
+	}
+}
 
-		int32                   NumRows = DefaultValue.IsValid() ? 1 : 0;
-		FStructuredArchiveArray Array   = StructDataSlot.EnterArray(NumRows);
+UScriptStruct* UDevParamStructType::GetTargetStructType() const
+{
+	return StructType;
+}
 
-		if ( DefaultValue.IsValid() )
+#if WITH_EDITOR
+
+// エディター用
+// DevParamエディター内の表に表示されるパラメータ値
+FText UDevParamStructType::GetDefaultValueExtension() const
+{
+	const uint8* StructMemory = nullptr;
+	if ( GetDefaultValuePtr(StructMemory) )
+	{
+		FString JsonString;
+		if ( FJsonObjectConverter::UStructToJsonObjectString(
+		         StructType, StructMemory, JsonString) )
 		{
-			FStructuredArchiveRecord Row     = Array.EnterElement().EnterRecord();
-			uint8*                   RowData = DefaultValue->GetStructMemory();
-
-			StructType->SerializeItem(
-			    Row.EnterField(SA_FIELD_NAME(TEXT("DefaultValue"))),
-			    RowData,
-			    nullptr);
+			JsonString = JsonString.Replace(TEXT("\r\n"), TEXT(""));
+			return FText::FromString(JsonString);
 		}
 	}
+
+	return FText::GetEmpty();
 }
 
-void UDevParamStructType::PostLoad()
+bool UDevParamStructType::CanEditChange(const FProperty* InProperty) const
 {
-	Super::PostLoad();
-}
-
-//~ End UObject Interface
-
-void UDevParamStructType::CreateStruct()
-{
-	if ( !DefaultValue.IsValid() && StructType )
+	if ( GetOuter()->IsA<UDevParamDataAsset>() )
 	{
-		DefaultValue = MakeShared<FStructOnScope>(StructType);
-	}
-}
+		// データアセットに配置されているものなので特殊化を行う
 
-void UDevParamStructType::DestoryStruct() {}
-
-// 構造体をプリロードする
-void UDevParamStructType::PreloadStructType()
-{
-	if ( StructType && StructType->HasAnyFlags(RF_NeedLoad) )
-	{
-		auto RowStructLinker = StructType->GetLinker();
-		if ( RowStructLinker )
+		FName PropertyName = InProperty->GetFName();
+		if ( (PropertyName ==
+		      GET_MEMBER_NAME_CHECKED(UDevParamStructType, StructType)) ||
+		     (PropertyName == GET_MEMBER_NAME_CHECKED(UDevParamStructType,
+		                                              DefaultValuePropertyName)) )
 		{
-			RowStructLinker->Preload(StructType);
+            // 該当のパラメータは編集させない
+			return false;
 		}
 	}
+
+	return Super::CanEditChange(InProperty);
 }
 
-const TSharedPtr<FStructOnScope>& UDevParamStructType::GetDefaultValue() const
+#endif
+
+// デフォルト値の値を取得する
+bool UDevParamStructType::GetDefaultValuePtr(const uint8*& OutStructMemory) const
 {
-	return DefaultValue;
+	UClass*          Class                = GetClass();
+	FStructProperty* DefaultValueProperty = CastField<FStructProperty>(
+	    Class->FindPropertyByName(DefaultValuePropertyName));
+
+	if ( DefaultValueProperty == nullptr )
+	{
+		// DefaultValuePropertyが見つからなかった
+		FDevMenuUtility::MessageLog(
+		    this,
+		    FText::Format(LOCTEXT("UDevParamStructTypeErrorNotFound",
+		                          "NotFoundProperty: Tag={0} PropertyName={1} "),
+		                  FText::FromName(ParamId.GetTagName()),
+		                  FText::FromName(DefaultValuePropertyName)));
+
+		return false;
+	}
+
+	if ( DefaultValueProperty->Struct != StructType )
+	{
+		// 構造体の型が不一致
+		FDevMenuUtility::MessageLog(
+		    this,
+		    FText::Format(
+		        LOCTEXT(
+		            "UDevParamStructTypeErrorMissType",
+		            "Structure Type mismatch: PropertyStruct={0} StructType={1} "),
+		        FText::FromString(GetNameSafe(DefaultValueProperty->Struct)),
+		        FText::FromString(GetNameSafe(StructType))));
+
+		return false;
+	}
+
+	//
+	const uint8* StructMemory =
+	    DefaultValueProperty->ContainerPtrToValuePtr<uint8>(this);
+
+	if ( StructMemory )
+	{
+		// 取得に成功
+		OutStructMemory = StructMemory;
+
+		return true;
+	}
+	return false;
 }
+
+#undef LOCTEXT_NAMESPACE

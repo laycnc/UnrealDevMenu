@@ -2,11 +2,25 @@
 
 using UnrealBuildTool;
 
-public class UnrealDevMenu : ModuleRules
+public class UnrealDevMenuNode : ModuleRules
 {
-    public UnrealDevMenu(ReadOnlyTargetRules Target) : base(Target)
+    public UnrealDevMenuNode(ReadOnlyTargetRules Target) : base(Target)
     {
         PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+
+        PublicIncludePaths.AddRange(
+            new string[] {
+				// ... add public include paths required here ...
+			}
+            );
+
+
+        PrivateIncludePaths.AddRange(
+            new string[] {
+				// ... add other private include paths required here ...
+			}
+            );
+
 
         PublicDependencyModuleNames.AddRange(
             new string[]
@@ -16,6 +30,7 @@ public class UnrealDevMenu : ModuleRules
 			}
             );
 
+
         PrivateDependencyModuleNames.AddRange(
             new string[]
             {
@@ -23,18 +38,17 @@ public class UnrealDevMenu : ModuleRules
                 "Engine",
                 "Slate",
                 "SlateCore",
-                "GameplayTags",
-                "ImGui",
-                "Json",
-                "JsonUtilities",
+                "UnrealDevMenu",
 				// ... add private dependencies that you statically link with here ...	
 			}
             );
 
-        if( Target.Type == TargetType.Editor)
-        {
-            PrivateDependencyModuleNames.Add("UnrealEd");
-        }
 
+        DynamicallyLoadedModuleNames.AddRange(
+            new string[]
+            {
+				// ... add any modules that your module loads dynamically here ...
+			}
+            );
     }
 }

@@ -3,11 +3,15 @@
 #include "DevMenuSubsystem.h"
 #include "Engine/World.h"
 #include "DevMenu.h"
+#include "DevParamSubsystem.h"
 
 // USubsystem implementation Begin
 void UDevMenuSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
+
+	// DevParamに依存している
+	Collection.InitializeDependency<UDevParamSubsystem>();
 
 #if WITH_IMGUI
 
@@ -75,16 +79,13 @@ void UDevMenuSubsystem::InitializeMenu(UDevMenu* InMenuAsset)
 void UDevMenuSubsystem::RegisterWindow(const UDevMenu& InWindowDevMenu)
 {
 	WindowDevMenus.Add(&InWindowDevMenu);
-	WindowVariables.FindOrAdd(InWindowDevMenu.Id);
-}
 
-FDevMenuSubWindowInfo* UDevMenuSubsystem::GetWindowVariable(FName Id)
-{
-	if ( auto* Result = WindowVariables.Find(Id) )
+	if ( UDevParamSubsystem* DevParam = UDevParamSubsystem::Get(this) )
 	{
-		return Result;
+		FDevMenuSubWindowInfo WindowInfo = {};
+		FName WindowInfoParamId          = InWindowDevMenu.GetWindowInfoParamId();
+		DevParam->RegisterStructParam(WindowInfoParamId, WindowInfo);
 	}
-	return nullptr;
 }
 
 void UDevMenuSubsystem::ImGuiTick()
@@ -98,10 +99,7 @@ void UDevMenuSubsystem::ImGuiTick()
 
 	for ( auto& Window : WindowDevMenus )
 	{
-		if ( auto* WindowInfo = GetWindowVariable(Window->Id) )
-		{
-			Window->UpdateMenuWindow(*this, *WindowInfo);
-		}
+		Window->UpdateMenuWindow(*this);
 	}
 
 #endif // WITH_IMGUI

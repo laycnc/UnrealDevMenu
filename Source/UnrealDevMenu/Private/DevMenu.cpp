@@ -154,6 +154,7 @@ void UDevMenu::UpdateMenuWindow(UDevMenuSubsystem& InSubsystem) const
 			// 座標が変わっているので保存値を変える
 			WindowInfo.Position.X = NewWindowPos.x;
 			WindowInfo.Position.Y = NewWindowPos.y;
+			bChangedValue         = true;
 		}
 
 		const ImVec2 NewWindowSize = ImGui::GetWindowSize();
@@ -162,6 +163,13 @@ void UDevMenu::UpdateMenuWindow(UDevMenuSubsystem& InSubsystem) const
 			// サイズが変わっているので保存値を変える
 			WindowInfo.Size.X = NewWindowSize.x;
 			WindowInfo.Size.Y = NewWindowSize.y;
+			bChangedValue     = true;
+		}
+
+		if ( !WindowInfo.bVisible )
+		{
+			// 表示が消えている場合にはパラメータ変更扱い
+			bChangedValue = true;
 		}
 	}
 

@@ -118,7 +118,15 @@ void UDevParamSubsystem::SetPrimitiveValue(const FGameplayTag& ParamId,
 	{
 		(*Result) = NewValue;
 		OnChangedParam.Broadcast(ParamId);
+		return;
 	}
+
+	// TargetValueが未設定なのでエラーを出して終了
+	FDevMenuUtility::MessageLog(
+	    DataAsset,
+	    FText::Format(LOCTEXT("SetPrimitiveValue_NotFoundStruct",
+	                          "NotFound DevParam: Tag={0}"),
+	                  FText::FromName(ParamId.GetTagName())));
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -193,7 +201,7 @@ void UDevParamSubsystem::GetValueByStruct_Impl(FName          ParamId,
 	{
 		// 構造体が見つからなかった
 		FDevMenuUtility::MessageLog(
-		    this,
+		    DataAsset,
 		    FText::Format(LOCTEXT("GetValueByStruct_NotFoundStruct",
 		                          "NotFound ParamStruct: Struct={0} Tag={1}"),
 		                  FText::FromString(GetNameSafe(ParamType)),
@@ -208,7 +216,7 @@ void UDevParamSubsystem::GetValueByStruct_Impl(FName          ParamId,
 	{
 		// GameplayTagが見つからなかった
 		FDevMenuUtility::MessageLog(
-		    this,
+		    DataAsset,
 		    FText::Format(LOCTEXT("GetValueByStruct_NotFoundParamId",
 		                          "NotFound ParamId: Struct={0} Tag={1}"),
 		                  FText::FromString(GetNameSafe(ParamType)),
@@ -263,7 +271,7 @@ void UDevParamSubsystem::SetValueByStruct_Impl(FName          ParamId,
 	{
 		// 構造体が見つからなかった
 		FDevMenuUtility::MessageLog(
-		    this,
+		    DataAsset,
 		    FText::Format(LOCTEXT("SetValueByStruct_NotFoundStruct",
 		                          "NotFound ParamStruct: Struct={0} Tag={1}"),
 		                  FText::FromString(GetNameSafe(ParamType)),
@@ -278,7 +286,7 @@ void UDevParamSubsystem::SetValueByStruct_Impl(FName          ParamId,
 	{
 		// GameplayTagが見つからなかった
 		FDevMenuUtility::MessageLog(
-		    this,
+		    DataAsset,
 		    FText::Format(LOCTEXT("SetValueByStruct_NotFoundParamId",
 		                          "NotFound ParamId: Struct={0} Tag={1}"),
 		                  FText::FromString(GetNameSafe(ParamType)),
@@ -323,7 +331,15 @@ void UDevParamSubsystem::GetPrimitiveValue(const FGameplayTag&   ParamId,
 	if ( const T* Result = TargetValues.Find(ParamId.GetTagName()) )
 	{
 		ResultValue = *Result;
+		return;
 	}
+
+	// TargetValueが未設定なのでエラーを出して終了
+	FDevMenuUtility::MessageLog(
+	    DataAsset,
+	    FText::Format(LOCTEXT("GetPrimitiveValue_NotFoundStruct",
+	                          "NotFound DevParam: Tag={0}"),
+	                  FText::FromName(ParamId.GetTagName())));
 }
 
 void UDevParamSubsystem::RegisterStructParam(FName          ParamId,

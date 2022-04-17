@@ -27,6 +27,9 @@ namespace
 #if WITH_EDITOR
 					FKismetEditorUtilities::BringKismetToFocusAttentionOnObject(
 					    UObjectToken->GetObject().Get());
+
+					// todo: アセットエディターを開けるようにする
+
 #endif
 				}
 			}

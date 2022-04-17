@@ -21,12 +21,11 @@ struct FDevParamStructDummyType
 	GENERATED_BODY()
 };
 
-
 USTRUCT()
 struct FDevParameter
 {
-   	GENERATED_BODY()
-public: 
+	GENERATED_BODY()
+public:
 	// デバッグパラメータの値の管理
 	// 管理方法は後日調整を行う
 
@@ -311,6 +310,12 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "DevMenu|Paramer")
 	bool SaveParam(FString SaveFilePath) const;
 
+	/**
+     * デバッグパラメータを読み込みする
+     */
+	UFUNCTION(BlueprintCallable, Category = "DevMenu|Paramer")
+	bool LoadParam(FString LoadFilePath);
+
 private:
 	template<class T>
 	void SetPrimitiveValue(const FGameplayTag& ParamId,
@@ -336,7 +341,7 @@ private:
 	// 管理方法は後日調整を行う
 
 	UPROPERTY(Transient)
-    FDevParameter Parameter;
+	FDevParameter Parameter;
 
 	UPROPERTY(Transient)
 	UDevParamDataAsset* DataAsset = nullptr;

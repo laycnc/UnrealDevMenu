@@ -86,6 +86,92 @@ namespace
 		return true;
 	}
 
+	bool JsonToFDevParameterAttributes(TSharedRef<FJsonObject> JsonObject,
+	                                   FDevParameter&          DevParameter,
+	                                   int64                   CheckFlags = 0,
+	                                   int64                   SkipFlags  = 0)
+	{
+		// 構造体の箇所以外はデフォルトの処理を行う
+		if ( !FJsonObjectConverter::JsonObjectToUStruct(
+		         JsonObject,
+		         FDevParameter::StaticStruct(),
+		         &DevParameter,
+		         CheckFlags,
+		         SkipFlags) )
+		{
+			return false;
+		}
+
+		TSharedPtr<FJsonObject> StructValueMapJson =
+		    JsonObject->GetObjectField(TEXT("StructValueMap"));
+
+		for ( auto& StructValueMapJsonPair : StructValueMapJson->Values )
+		{
+			const FString& StructValueMapKeyPath = StructValueMapJsonPair.Key;
+
+			if ( StructValueMapJsonPair.Value->Type != EJson::Object )
+			{
+				// Obj型が来るはず…
+				// クラッシュさせない為に念の為チェックを入れる
+				continue;
+			}
+
+			const TSharedPtr<FJsonObject>& StructDevParamValuesJson =
+			    StructValueMapJsonPair.Value->AsObject();
+
+			// PropertyBaseObject.cpp
+			// ↑でのロードを簡略化して実装
+			TStringBuilder<256> Temp;
+			const TCHAR*        Buffer = FPropertyHelpers::ReadToken(
+                *StructValueMapKeyPath, /* out */ Temp, true);
+			if ( Buffer == nullptr )
+			{
+				return false;
+			}
+
+			UObject* Obj        = StaticFindObjectSafe(nullptr, nullptr, Buffer);
+			UStruct* StructType = Cast<UStruct>(Obj);
+
+			if ( !IsValid(StructType) )
+			{
+				continue;
+			}
+
+			// 該当の構造体が見つかったので追加する
+			TMap<FName, TSharedPtr<FStructOnScope>>& StructValue =
+			    DevParameter.StructValueMap.FindOrAdd(StructType);
+
+			for ( auto& StructDevParamValuesJsonPair :
+			      StructDevParamValuesJson->Values )
+			{
+				const FString& ParamId = StructDevParamValuesJsonPair.Key;
+
+				if ( StructDevParamValuesJsonPair.Value->Type != EJson::Object )
+				{
+					continue;
+				}
+
+				const TSharedPtr<FJsonObject>& StructDevParamJson =
+				    StructDevParamValuesJsonPair.Value->AsObject();
+
+				TSharedPtr<FStructOnScope> StructData =
+				    MakeShareable(new FStructOnScope(StructType));
+
+				// 構造体の箇所以外はデフォルトの処理を行う
+				if ( FJsonObjectConverter::JsonObjectToUStruct(
+				         StructDevParamJson.ToSharedRef(),
+				         StructType,
+				         StructData->GetStructMemory(),
+				         CheckFlags,
+				         SkipFlags) )
+				{
+					StructValue.Add(FName(*ParamId), StructData);
+				}
+			}
+		}
+		return true;
+	}
+
 } // namespace
 
 // デバッグパラメータサブシステムの取得
@@ -543,6 +629,38 @@ bool UDevParamSubsystem::SaveParam(FString SaveFilePath) const
 	FJsonSerializer::Serialize(JsonRootObject.ToSharedRef(), Writer);
 
 	return FFileHelper::SaveStringToFile(OutPutString, *SaveFilePath);
+}
+
+// デバッグパラメータを読み込みする
+bool UDevParamSubsystem::LoadParam(FString LoadFilePath)
+{
+	FString OutPutString;
+	if ( !FFileHelper::LoadFileToString(OutPutString, *LoadFilePath) )
+	{
+		return false;
+	}
+
+	// FJsonObject(Jsonデータの入れ物)を作成
+	TSharedPtr<FJsonObject> JsonRootObject = MakeShareable(new FJsonObject());
+
+	// FStringからJsonを読み込むためのReaderを作成
+	TSharedRef<TJsonReader<>> JsonReader =
+	    TJsonReaderFactory<>::Create(OutPutString);
+
+	// Json文字列からJsonオブジェクトに読み込み
+	if ( !FJsonSerializer::Deserialize(JsonReader, JsonRootObject) )
+	{
+		return false;
+	}
+
+	FDevParameter Param;
+
+	if ( !JsonToFDevParameterAttributes(JsonRootObject.ToSharedRef(), Param) )
+	{
+		return false;
+	}
+
+	return true;
 }
 
 //////////////////////////////////////////////////////////////////////////

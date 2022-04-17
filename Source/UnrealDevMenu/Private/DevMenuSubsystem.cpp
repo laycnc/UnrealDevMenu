@@ -30,13 +30,7 @@ void UDevMenuSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 			io.Fonts->Build();
 			bInitialize = true;
 		}
-
-		// ImGuiのWorld Delegateに処理を登録
-		FImGuiDelegates::OnWorldDebug(GetWorld())
-		    .AddUObject(this, &UDevMenuSubsystem::ImGuiTick);
 	}
-
-	FImGuiModule::Get().GetProperties().SetInputEnabled(true);
 
 #endif // WITH_IMGUI
 }
@@ -72,6 +66,12 @@ TStatId UDevMenuSubsystem::GetStatId() const
 
 void UDevMenuSubsystem::InitializeMenu(UDevMenu* InMenuAsset)
 {
+	// ImGuiのWorld Delegateに処理を登録
+	FImGuiDelegates::OnWorldDebug(GetWorld())
+	    .AddUObject(this, &UDevMenuSubsystem::ImGuiTick);
+
+	FImGuiModule::Get().GetProperties().SetInputEnabled(true);
+
 	RootDevMenu = InMenuAsset;
 	InMenuAsset->GeneratedInstance(*this);
 }

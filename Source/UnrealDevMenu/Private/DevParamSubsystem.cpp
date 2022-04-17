@@ -15,10 +15,78 @@
 #include "Engine/Engine.h"
 #include "JsonObjectConverter.h"
 #include "DevMenuUtility.h"
+#include "Misc/FileHelper.h"
 
 DEFINE_LOG_CATEGORY(LogDevMenuParam);
 
 #define LOCTEXT_NAMESPACE "UDevParamSubsystem"
+
+namespace
+{
+	bool FDevParameterToJsonAttributes(
+	    const FDevParameter&                              DevParameter,
+	    TSharedRef<FJsonObject>                           OutJsonObject,
+	    int64                                             CheckFlags = 0,
+	    int64                                             SkipFlags  = 0,
+	    const FJsonObjectConverter::CustomExportCallback* ExportCb   = nullptr)
+	{
+		// 構造体の箇所以外はデフォルトの処理を行う
+		if ( !FJsonObjectConverter::UStructToJsonAttributes(
+		         FDevParameter::StaticStruct(),
+		         &DevParameter,
+		         OutJsonObject->Values,
+		         CheckFlags,
+		         SkipFlags,
+		         ExportCb) )
+		{
+			return false;
+		}
+
+		TSharedPtr<FJsonObject> StructValueMapJson = MakeShared<FJsonObject>();
+
+		for ( const auto& StructValueMapPair : DevParameter.StructValueMap )
+		{
+			//
+			UStruct*    StructKey   = StructValueMapPair.Key;
+			const auto& StructValue = StructValueMapPair.Value;
+
+			TSharedPtr<FJsonObject> StructMapValueJson = MakeShared<FJsonObject>();
+
+			const FString StructValueMapKeyPath =
+			    FObjectPropertyBase::GetExportPath(StructKey, nullptr, nullptr, 0);
+
+			for ( const auto& StructValuePair : StructValue )
+			{
+				//
+				FName       Key   = StructValuePair.Key;
+				const auto& Value = StructValuePair.Value;
+
+				TSharedPtr<FJsonObject> StructValueJson = MakeShared<FJsonObject>();
+
+				FJsonObjectConverter::UStructToJsonObject(
+				    Value->GetStruct(),
+				    Value->GetStructMemory(),
+				    StructValueJson.ToSharedRef(),
+				    CheckFlags,
+				    SkipFlags,
+				    ExportCb);
+
+				StructMapValueJson->SetField(
+				    Key.ToString(), MakeShared<FJsonValueObject>(StructValueJson));
+			}
+
+			StructValueMapJson->SetField(
+			    StructValueMapKeyPath,
+			    MakeShared<FJsonValueObject>(StructMapValueJson));
+		}
+
+		OutJsonObject->Values.Add(FString(TEXT("StructValueMap")),
+		                          MakeShared<FJsonValueObject>(StructValueMapJson));
+
+		return true;
+	}
+
+} // namespace
 
 // デバッグパラメータサブシステムの取得
 UDevParamSubsystem* UDevParamSubsystem::Get(const UObject* InWorldContext)
@@ -68,45 +136,46 @@ void UDevParamSubsystem::InitializeAsset(UDevParamDataAsset* InAsset)
 // bool型のパラメータを設定する
 void UDevParamSubsystem::SetValueByBool(FGameplayTag ParamId, bool NewValue)
 {
-	SetPrimitiveValue(ParamId, BoolValues, NewValue);
+	SetPrimitiveValue(ParamId, Parameter.BoolValues, NewValue);
 }
 
 // 整数型のパラメータを設定する
 void UDevParamSubsystem::SetValueByInt32(FGameplayTag ParamId, int32 NewValue)
 {
-	SetPrimitiveValue(ParamId, Int32Values, NewValue);
+	SetPrimitiveValue(ParamId, Parameter.Int32Values, NewValue);
 }
 
 // 不動点少数型のパラメータを設定する
 void UDevParamSubsystem::SetValueByFloat(FGameplayTag ParamId, float NewValue)
 {
-	SetPrimitiveValue(ParamId, FloatValues, NewValue);
+	SetPrimitiveValue(ParamId, Parameter.FloatValues, NewValue);
 }
 
 // 倍精度不動点少数型のパラメータを設定する
 void UDevParamSubsystem::SetValueByDouble(FGameplayTag ParamId, double NewValue)
 {
-	SetPrimitiveValue(ParamId, DoubleValues, NewValue);
+	SetPrimitiveValue(ParamId, Parameter.DoubleValues, NewValue);
 }
 
 // Name型のパラメータを設定する
 void UDevParamSubsystem::SetValueByName(FGameplayTag ParamId, FName NewValue)
 {
-	SetPrimitiveValue(ParamId, NameValues, NewValue);
+	SetPrimitiveValue(ParamId, Parameter.NameValues, NewValue);
 }
 
 // String型のパラメータを設定する
 void UDevParamSubsystem::SetValueByString(FGameplayTag   ParamId,
                                           const FString& NewValue)
 {
-	SetPrimitiveValue<FString>(ParamId, StringValues, NewValue);
+	SetPrimitiveValue<FString>(ParamId, Parameter.StringValues, NewValue);
 }
 
 // Object型のパラメータを設定する
 void UDevParamSubsystem::SetValueByObject(FGameplayTag ParamId, UObject* NewValue)
 {
 	TWeakObjectPtr<UObject> NewObj = NewValue;
-	SetPrimitiveValue<TWeakObjectPtr<UObject>>(ParamId, ObjectValues, NewObj);
+	SetPrimitiveValue<TWeakObjectPtr<UObject>>(
+	    ParamId, Parameter.ObjectValues, NewObj);
 }
 
 template<class T>
@@ -136,42 +205,42 @@ void UDevParamSubsystem::SetPrimitiveValue(const FGameplayTag& ParamId,
 void UDevParamSubsystem::GetValueByBool(FGameplayTag ParamId,
                                         bool&        ResultValue) const
 {
-	GetPrimitiveValue(ParamId, BoolValues, ResultValue);
+	GetPrimitiveValue(ParamId, Parameter.BoolValues, ResultValue);
 }
 
 // 整数型のパラメータを取得する
 void UDevParamSubsystem::GetValueByInt32(FGameplayTag ParamId,
                                          int32&       ResultValue) const
 {
-	GetPrimitiveValue(ParamId, Int32Values, ResultValue);
+	GetPrimitiveValue(ParamId, Parameter.Int32Values, ResultValue);
 }
 
 // 不動点少数型のパラメータを取得する
 void UDevParamSubsystem::GetValueByFloat(FGameplayTag ParamId,
                                          float&       ResultValue) const
 {
-	GetPrimitiveValue(ParamId, FloatValues, ResultValue);
+	GetPrimitiveValue(ParamId, Parameter.FloatValues, ResultValue);
 }
 
 // 倍精度不動点少数型のパラメータを取得する
 void UDevParamSubsystem::GetValueByDouble(FGameplayTag ParamId,
                                           double&      ResultValue) const
 {
-	GetPrimitiveValue(ParamId, DoubleValues, ResultValue);
+	GetPrimitiveValue(ParamId, Parameter.DoubleValues, ResultValue);
 }
 
 // Name型のパラメータを取得する
 void UDevParamSubsystem::GetValueByName(FGameplayTag ParamId,
                                         FName&       ResultValue) const
 {
-	GetPrimitiveValue(ParamId, NameValues, ResultValue);
+	GetPrimitiveValue(ParamId, Parameter.NameValues, ResultValue);
 }
 
 // String型のパラメータを取得する
 void UDevParamSubsystem::GetValueByString(FGameplayTag ParamId,
                                           FString&     ResultValue) const
 {
-	GetPrimitiveValue(ParamId, StringValues, ResultValue);
+	GetPrimitiveValue(ParamId, Parameter.StringValues, ResultValue);
 }
 
 // Object型のパラメータを取得する
@@ -179,7 +248,7 @@ void UDevParamSubsystem::GetValueByObject(FGameplayTag ParamId,
                                           UObject*&    ResultValue) const
 {
 	TWeakObjectPtr<UObject> ResultObj;
-	GetPrimitiveValue(ParamId, ObjectValues, ResultObj);
+	GetPrimitiveValue(ParamId, Parameter.ObjectValues, ResultObj);
 	ResultValue = ResultObj.Get();
 }
 
@@ -195,7 +264,7 @@ void UDevParamSubsystem::GetValueByStruct_Impl(FName          ParamId,
                                                void*          ResultValue) const
 {
 	const TMap<FName, TSharedPtr<FStructOnScope>>* StructValues =
-	    StructValueMap.Find(ParamType);
+	    Parameter.StructValueMap.Find(ParamType);
 
 	if ( StructValues == nullptr )
 	{
@@ -265,7 +334,7 @@ void UDevParamSubsystem::SetValueByStruct_Impl(FName          ParamId,
                                                const void*    NewValue) const
 {
 	const TMap<FName, TSharedPtr<FStructOnScope>>* StructValues =
-	    StructValueMap.Find(ParamType);
+	    Parameter.StructValueMap.Find(ParamType);
 
 	if ( StructValues == nullptr )
 	{
@@ -347,7 +416,7 @@ void UDevParamSubsystem::RegisterStructParam(FName          ParamId,
                                              const void*    NewValue)
 {
 	TMap<FName, TSharedPtr<FStructOnScope>>& StructValue =
-	    StructValueMap.FindOrAdd(ParamType);
+	    Parameter.StructValueMap.FindOrAdd(ParamType);
 
 	TSharedPtr<FStructOnScope> NewStruct =
 	    MakeShareable(new FStructOnScope(ParamType));
@@ -407,15 +476,15 @@ namespace
 
 void UDevParamSubsystem::PrintValue() const
 {
-	PrintPrimitiveValue(BoolValues);
-	PrintPrimitiveValue(Int32Values);
-	PrintPrimitiveValue(FloatValues);
-	PrintPrimitiveValue(DoubleValues);
-	PrintPrimitiveValue(NameValues);
-	PrintPrimitiveValue(StringValues);
-	PrintPrimitiveValue(ObjectValues);
+	PrintPrimitiveValue(Parameter.BoolValues);
+	PrintPrimitiveValue(Parameter.Int32Values);
+	PrintPrimitiveValue(Parameter.FloatValues);
+	PrintPrimitiveValue(Parameter.DoubleValues);
+	PrintPrimitiveValue(Parameter.NameValues);
+	PrintPrimitiveValue(Parameter.StringValues);
+	PrintPrimitiveValue(Parameter.ObjectValues);
 
-	for ( auto& StructPair : StructValueMap )
+	for ( auto& StructPair : Parameter.StructValueMap )
 	{
 		const TObjectPtr<UStruct>& StructType  = StructPair.Key;
 		const auto&                StructValue = StructPair.Value;
@@ -459,6 +528,23 @@ void UDevParamSubsystem::PrintPrimitiveValue(
 	}
 }
 
+// デバッグパラメータを保存する
+bool UDevParamSubsystem::SaveParam(FString SaveFilePath) const
+{
+	TSharedPtr<FJsonObject> JsonRootObject = MakeShareable(new FJsonObject);
+
+	FDevParameterToJsonAttributes(Parameter, JsonRootObject.ToSharedRef());
+
+	// FStringにJsonを書き込むためのWriterを作成
+	FString                   OutPutString;
+	TSharedRef<TJsonWriter<>> Writer = TJsonWriterFactory<>::Create(&OutPutString);
+
+	// JsonをFStringに書き込み
+	FJsonSerializer::Serialize(JsonRootObject.ToSharedRef(), Writer);
+
+	return FFileHelper::SaveStringToFile(OutPutString, *SaveFilePath);
+}
+
 //////////////////////////////////////////////////////////////////////////
 //
 
@@ -470,37 +556,37 @@ void UDevParamSubsystem::AddValues(UDevParamType* ParamType)
 	// 構造体の生成の場合
 	if ( auto* ParamType_Bool = Cast<UDevParamType_Bool>(ParamType) )
 	{
-		bool& NewValue = BoolValues.Emplace(ParamId);
+		bool& NewValue = Parameter.BoolValues.Emplace(ParamId);
 		ParamType_Bool->InitializeValue(&NewValue);
 	}
 	else if ( auto* ParamType_Int32 = Cast<UDevParamType_Int32>(ParamType) )
 	{
-		int32& NewValue = Int32Values.Emplace(ParamId);
+		int32& NewValue = Parameter.Int32Values.Emplace(ParamId);
 		ParamType_Int32->InitializeValue(&NewValue);
 	}
 	else if ( auto* ParamType_Float = Cast<UDevParamType_Float>(ParamType) )
 	{
-		float& NewValue = FloatValues.Emplace(ParamId);
+		float& NewValue = Parameter.FloatValues.Emplace(ParamId);
 		ParamType_Float->InitializeValue(&NewValue);
 	}
 	else if ( auto* ParamType_Double = Cast<UDevParamType_Double>(ParamType) )
 	{
-		double& NewValue = DoubleValues.Emplace(ParamId);
+		double& NewValue = Parameter.DoubleValues.Emplace(ParamId);
 		ParamType_Double->InitializeValue(&NewValue);
 	}
 	else if ( auto* ParamType_Name = Cast<UDevParamType_Name>(ParamType) )
 	{
-		FName& NewValue = NameValues.Emplace(ParamId);
+		FName& NewValue = Parameter.NameValues.Emplace(ParamId);
 		ParamType_Name->InitializeValue(&NewValue);
 	}
 	else if ( auto* ParamType_String = Cast<UDevParamType_String>(ParamType) )
 	{
-		FString& NewValue = StringValues.Emplace(ParamId);
+		FString& NewValue = Parameter.StringValues.Emplace(ParamId);
 		ParamType_String->InitializeValue(&NewValue);
 	}
 	else if ( auto* ParamType_Object = Cast<UDevParamType_Object>(ParamType) )
 	{
-		TWeakObjectPtr<UObject>& NewValue = ObjectValues.Emplace(ParamId);
+		TWeakObjectPtr<UObject>& NewValue = Parameter.ObjectValues.Emplace(ParamId);
 		ParamType_Object->InitializeValue(&NewValue);
 	}
 	else if ( auto* ParamType_Struct = Cast<UDevParamStructType>(ParamType) )
@@ -509,7 +595,7 @@ void UDevParamSubsystem::AddValues(UDevParamType* ParamType)
 		UStruct* StructType = ParamType_Struct->GetTargetStructType();
 
 		TMap<FName, TSharedPtr<FStructOnScope>>& StructValue =
-		    StructValueMap.FindOrAdd(StructType);
+		    Parameter.StructValueMap.FindOrAdd(StructType);
 
 		FStructOnScope NewStructValue(StructType);
 
@@ -526,15 +612,14 @@ void UDevParamSubsystem::AddValues(UDevParamType* ParamType)
 // パラメータの終了処理
 void UDevParamSubsystem::FinalizeDevParam()
 {
-
-	BoolValues.Empty();
-	Int32Values.Empty();
-	FloatValues.Empty();
-	DoubleValues.Empty();
-	NameValues.Empty();
-	StringValues.Empty();
-	ObjectValues.Empty();
-	StructValueMap.Empty();
+	Parameter.BoolValues.Empty();
+	Parameter.Int32Values.Empty();
+	Parameter.FloatValues.Empty();
+	Parameter.DoubleValues.Empty();
+	Parameter.NameValues.Empty();
+	Parameter.StringValues.Empty();
+	Parameter.ObjectValues.Empty();
+	Parameter.StructValueMap.Empty();
 }
 
 #undef LOCTEXT_NAMESPACE

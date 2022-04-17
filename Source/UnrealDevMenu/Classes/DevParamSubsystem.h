@@ -21,6 +21,35 @@ struct FDevParamStructDummyType
 	GENERATED_BODY()
 };
 
+
+USTRUCT()
+struct FDevParameter
+{
+   	GENERATED_BODY()
+public: 
+	// デバッグパラメータの値の管理
+	// 管理方法は後日調整を行う
+
+	UPROPERTY()
+	TMap<FName, bool> BoolValues;
+	UPROPERTY()
+	TMap<FName, int32> Int32Values;
+	UPROPERTY()
+	TMap<FName, float> FloatValues;
+	UPROPERTY()
+	TMap<FName, double> DoubleValues;
+	UPROPERTY()
+	TMap<FName, FName> NameValues;
+	UPROPERTY()
+	TMap<FName, FString> StringValues;
+	UPROPERTY()
+	TMap<FName, TWeakObjectPtr<UObject>> ObjectValues;
+
+	// 構造体の特殊化
+	TMap<TObjectPtr<UStruct>, TMap<FName, TSharedPtr<FStructOnScope>>>
+	    StructValueMap;
+};
+
 /**
  * 
  */
@@ -276,6 +305,12 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "DevMenu|Paramer")
 	void PrintValue() const;
 
+	/**
+     * デバッグパラメータを保存する
+     */
+	UFUNCTION(BlueprintCallable, BlueprintPure = false, Category = "DevMenu|Paramer")
+	bool SaveParam(FString SaveFilePath) const;
+
 private:
 	template<class T>
 	void SetPrimitiveValue(const FGameplayTag& ParamId,
@@ -301,23 +336,7 @@ private:
 	// 管理方法は後日調整を行う
 
 	UPROPERTY(Transient)
-	TMap<FName, bool> BoolValues;
-	UPROPERTY(Transient)
-	TMap<FName, int32> Int32Values;
-	UPROPERTY(Transient)
-	TMap<FName, float> FloatValues;
-	UPROPERTY(Transient)
-	TMap<FName, double> DoubleValues;
-	UPROPERTY(Transient)
-	TMap<FName, FName> NameValues;
-	UPROPERTY(Transient)
-	TMap<FName, FString> StringValues;
-	UPROPERTY(Transient)
-	TMap<FName, TWeakObjectPtr<UObject>> ObjectValues;
-
-	// 構造体の特殊化
-	TMap<TObjectPtr<UStruct>, TMap<FName, TSharedPtr<FStructOnScope>>>
-	    StructValueMap;
+    FDevParameter Parameter;
 
 	UPROPERTY(Transient)
 	UDevParamDataAsset* DataAsset = nullptr;

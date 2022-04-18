@@ -69,6 +69,9 @@ public:
 	virtual void Deinitialize() override;
 	// USubsystem implementation End
 
+	static void AddReferencedObjects(UObject*             InThis,
+	                                 FReferenceCollector& Collector);
+
 	/** 
      * アセットの初期化
      * 

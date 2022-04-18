@@ -202,6 +202,30 @@ void UDevParamSubsystem::Deinitialize()
 }
 // USubsystem implementation End
 
+void UDevParamSubsystem::AddReferencedObjects(UObject*             InThis,
+                                              FReferenceCollector& Collector)
+{
+	UDevParamSubsystem* This = CastChecked<UDevParamSubsystem>(InThis);
+
+	// GCにStructMemoryを認識させる必要が有る
+	for ( auto& StructPair : This->Parameter.StructValueMap )
+	{
+		const UScriptStruct* StructType  = Cast<UScriptStruct>(StructPair.Key);
+		const auto&          StructValue = StructPair.Value;
+
+		for ( const auto& Pair : StructValue )
+		{
+			const FName&                      Tag   = Pair.Key;
+			const TSharedPtr<FStructOnScope>& Value = Pair.Value;
+			void* StructMemory                      = Value->GetStructMemory();
+
+			Collector.AddReferencedObjects(StructType, StructMemory);
+		}
+	}
+
+	Super::AddReferencedObjects(InThis, Collector);
+}
+
 void UDevParamSubsystem::InitializeAsset(UDevParamDataAsset* InAsset)
 {
 	if ( InAsset == nullptr )

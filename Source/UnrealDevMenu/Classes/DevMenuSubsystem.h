@@ -14,13 +14,13 @@ struct FDevMenuSubWindowInfo
 	GENERATED_BODY();
 public:
 	// window location
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DevMenu")
 	FVector2D Position;
 	// window size
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DevMenu")
 	FVector2D Size;
 	// window visible
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "DevMenu")
 	bool bVisible;
 };
 

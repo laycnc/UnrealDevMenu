@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Subsystems/WorldSubsystem.h"
 #include "GameplayTagsManager.h"
+#include "UObject/StructOnScope.h"
 class UDevParamType;
 class UDevParamDataAsset;
 #include "DevParamSubsystem.generated.h"

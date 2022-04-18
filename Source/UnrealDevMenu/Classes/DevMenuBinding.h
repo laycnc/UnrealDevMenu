@@ -3,6 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Templates/SubclassOf.h"
+class UBlueprintFunctionLibrary;
 #include "DevMenuBinding.generated.h"
 
 /**
@@ -17,12 +19,12 @@ public:
 	void Invoke(void* InParam) const;
 
 public:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "DevMenu")
 	TSubclassOf<UBlueprintFunctionLibrary> LibraryClass;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "DevMenu")
 	FName FunctionName;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "DevMenu")
 	TArray<FString> FunctionArgsType;
 };

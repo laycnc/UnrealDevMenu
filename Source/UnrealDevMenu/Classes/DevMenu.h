@@ -62,15 +62,15 @@ public:
 
 public:
 	// デバッグメニューの識別子(必須)
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "DevMenu")
 	FName Id;
 
 	// ウインドウを出すか？
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "DevMenu")
 	bool bWindow;
 
 	// メニューに配置されている要素
-	UPROPERTY(VisibleDefaultsOnly, Instanced, AdvancedDisplay)
+	UPROPERTY(VisibleDefaultsOnly, Instanced, AdvancedDisplay, Category = "DevMenu")
 	TArray<TObjectPtr<UDevMenuItemBase>> Items;
 
 private:

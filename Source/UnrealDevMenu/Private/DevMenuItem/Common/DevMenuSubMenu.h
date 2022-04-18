@@ -23,6 +23,6 @@ public:
 
 private:
 	// メニュー要素名
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "DevMenu")
 	TObjectPtr<UDevMenu> DevMenu;
 };

@@ -555,7 +555,7 @@ namespace
 	}
 	FString Conv_DevMenuToString(float Value)
 	{
-		return UKismetStringLibrary::Conv_FloatToString(Value);
+		return FString::SanitizeFloat(Value);
 	}
 
 	FString Conv_DevMenuToString(double Value)

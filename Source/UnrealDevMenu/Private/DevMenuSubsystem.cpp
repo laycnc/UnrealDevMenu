@@ -82,9 +82,13 @@ void UDevMenuSubsystem::RegisterWindow(const UDevMenu& InWindowDevMenu)
 
 	if ( UDevParamSubsystem* DevParam = UDevParamSubsystem::Get(this) )
 	{
-		FDevMenuSubWindowInfo WindowInfo = {};
-		FName WindowInfoParamId          = InWindowDevMenu.GetWindowInfoParamId();
-		DevParam->RegisterStructParam(WindowInfoParamId, WindowInfo);
+		// パラメータが存在しない場合は追加が必要
+		FName WindowInfoParamId = InWindowDevMenu.GetWindowInfoParamId();
+		if ( !DevParam->ExistsParam(WindowInfoParamId) )
+		{
+			FDevMenuSubWindowInfo WindowInfo = {};
+			DevParam->RegisterStructParam(WindowInfoParamId, WindowInfo);
+		}
 	}
 }
 

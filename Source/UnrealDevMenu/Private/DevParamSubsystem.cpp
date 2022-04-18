@@ -129,8 +129,8 @@ namespace
 				return false;
 			}
 
-			UObject* Obj        = StaticFindObjectSafe(nullptr, nullptr, Buffer);
-			UStruct* StructType = Cast<UStruct>(Obj);
+			UObject*       Obj = StaticFindObjectSafe(nullptr, nullptr, Buffer);
+			UScriptStruct* StructType = Cast<UScriptStruct>(Obj);
 
 			if ( !IsValid(StructType) )
 			{
@@ -226,7 +226,8 @@ void UDevParamSubsystem::AddReferencedObjects(UObject*             InThis,
 	Super::AddReferencedObjects(InThis, Collector);
 }
 
-void UDevParamSubsystem::InitializeAsset(UDevParamDataAsset* InAsset)
+void UDevParamSubsystem::InitializeAsset(UDevParamDataAsset* InAsset,
+                                         FString             LoadFilePath)
 {
 	if ( InAsset == nullptr )
 	{
@@ -238,6 +239,122 @@ void UDevParamSubsystem::InitializeAsset(UDevParamDataAsset* InAsset)
 	{
 		AddValues(Param);
 	}
+
+	// ファイルの指定が無い
+	if ( LoadFilePath.IsEmpty() )
+	{
+		return;
+	}
+
+	if ( FPaths::FileExists(LoadFilePath) )
+	{
+		// ファイルが存在している場合には読み込み処理を行う
+
+		FDevParameter LoadDevParam;
+
+		LoadParam(LoadFilePath, LoadDevParam);
+
+		auto SetCopyValues = [](auto& DestMap, const auto& CopyMap)
+		{
+			for ( auto& Pair : CopyMap )
+			{
+				DestMap.FindOrAdd(Pair.Key) = Pair.Value;
+			}
+		};
+		SetCopyValues(Parameter.BoolValues, LoadDevParam.BoolValues);
+		SetCopyValues(Parameter.DoubleValues, LoadDevParam.DoubleValues);
+		SetCopyValues(Parameter.FloatValues, LoadDevParam.FloatValues);
+		SetCopyValues(Parameter.Int32Values, LoadDevParam.Int32Values);
+		SetCopyValues(Parameter.NameValues, LoadDevParam.NameValues);
+		SetCopyValues(Parameter.ObjectValues, LoadDevParam.ObjectValues);
+		SetCopyValues(Parameter.StringValues, LoadDevParam.StringValues);
+
+		for ( auto& StructPair : LoadDevParam.StructValueMap )
+		{
+			UScriptStruct*                                 Struct = StructPair.Key;
+			const TMap<FName, TSharedPtr<FStructOnScope>>& CopyValues =
+			    StructPair.Value;
+			TMap<FName, TSharedPtr<FStructOnScope>>& DestValues =
+			    Parameter.StructValueMap.FindOrAdd(Struct);
+
+			for ( const auto& CopyValuePair : CopyValues )
+			{
+				FName                             ParamId   = CopyValuePair.Key;
+				const TSharedPtr<FStructOnScope>& CopyValue = CopyValuePair.Value;
+
+				if ( const TSharedPtr<FStructOnScope>* DestStructPtr =
+				         DestValues.Find(ParamId) )
+				{
+					// 既に構築されている場合
+					Struct->CopyScriptStruct((*DestStructPtr)->GetStructMemory(),
+					                         CopyValue->GetStructMemory());
+				}
+				else
+				{
+					// 新規で構築する場合
+					TSharedPtr<FStructOnScope> DestStruct =
+					    MakeShareable(new FStructOnScope(Struct));
+					DestValues.Emplace(ParamId, DestStruct);
+					Struct->CopyScriptStruct(DestStruct->GetStructMemory(),
+					                         CopyValue->GetStructMemory());
+				}
+			}
+		}
+	}
+}
+
+// 指定されたパラメータが存在するか？
+bool UDevParamSubsystem::ExistsParam(FGameplayTag ParamId) const
+{
+	return ExistsParam(ParamId.GetTagName());
+}
+
+// 指定されたパラメータが存在するか？
+bool UDevParamSubsystem::ExistsParam(FName ParamId) const
+{
+	const auto ExistsParam = [ParamId](auto& TargetValueMap) -> bool
+	{
+		return TargetValueMap.Find(ParamId) != nullptr;
+	};
+
+	if ( ExistsParam(Parameter.BoolValues) )
+	{
+		return true;
+	}
+	if ( ExistsParam(Parameter.DoubleValues) )
+	{
+		return true;
+	}
+	if ( ExistsParam(Parameter.FloatValues) )
+	{
+		return true;
+	}
+	if ( ExistsParam(Parameter.Int32Values) )
+	{
+		return true;
+	}
+	if ( ExistsParam(Parameter.NameValues) )
+	{
+		return true;
+	}
+	if ( ExistsParam(Parameter.ObjectValues) )
+	{
+		return true;
+	}
+	if ( ExistsParam(Parameter.StringValues) )
+	{
+		return true;
+	}
+
+	for ( const auto& Pair : Parameter.StructValueMap )
+	{
+		if ( ExistsParam(Pair.Value) )
+		{
+			return true;
+		}
+	}
+
+	return false;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -656,7 +773,8 @@ bool UDevParamSubsystem::SaveParam(FString SaveFilePath) const
 }
 
 // デバッグパラメータを読み込みする
-bool UDevParamSubsystem::LoadParam(FString LoadFilePath)
+bool UDevParamSubsystem::LoadParam(const FString& LoadFilePath,
+                                   FDevParameter& OutDevParam)
 {
 	FString OutPutString;
 	if ( !FFileHelper::LoadFileToString(OutPutString, *LoadFilePath) )
@@ -677,9 +795,7 @@ bool UDevParamSubsystem::LoadParam(FString LoadFilePath)
 		return false;
 	}
 
-	FDevParameter Param;
-
-	if ( !JsonToFDevParameterAttributes(JsonRootObject.ToSharedRef(), Param) )
+	if ( !JsonToFDevParameterAttributes(JsonRootObject.ToSharedRef(), OutDevParam) )
 	{
 		return false;
 	}
@@ -734,7 +850,7 @@ void UDevParamSubsystem::AddValues(UDevParamType* ParamType)
 	else if ( auto* ParamType_Struct = Cast<UDevParamStructType>(ParamType) )
 	{
 		// 構造体の場合
-		UStruct* StructType = ParamType_Struct->GetTargetStructType();
+		UScriptStruct* StructType = ParamType_Struct->GetTargetStructType();
 
 		TMap<FName, TSharedPtr<FStructOnScope>>& StructValue =
 		    Parameter.StructValueMap.FindOrAdd(StructType);

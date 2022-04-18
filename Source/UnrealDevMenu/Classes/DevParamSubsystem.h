@@ -46,7 +46,7 @@ public:
 	TMap<FName, TWeakObjectPtr<UObject>> ObjectValues;
 
 	// 構造体の特殊化
-	TMap<TObjectPtr<UStruct>, TMap<FName, TSharedPtr<FStructOnScope>>>
+	TMap<TObjectPtr<UScriptStruct>, TMap<FName, TSharedPtr<FStructOnScope>>>
 	    StructValueMap;
 };
 
@@ -78,8 +78,18 @@ public:
      * 
      * @param InAsset デバッグパラメータ記述アセット
      */
-	UFUNCTION(BlueprintCallable, Category = "Dev")
-	void InitializeAsset(UDevParamDataAsset* InAsset);
+	UFUNCTION(BlueprintCallable, Category = "DevMenu|Paramer")
+	void InitializeAsset(UDevParamDataAsset* InAsset, FString LoadFilePath);
+
+	/**
+     * 指定されたパラメータが存在するか？
+     */
+	UFUNCTION(BlueprintPure, Category = "DevMenu|Paramer")
+	bool ExistsParam(FGameplayTag ParamId) const;
+	/**
+     * 指定されたパラメータが存在するか？
+     */
+	bool ExistsParam(FName ParamId) const;
 
 	/**
      * bool型のパラメータを設定する
@@ -317,8 +327,7 @@ public:
 	/**
      * デバッグパラメータを読み込みする
      */
-	UFUNCTION(BlueprintCallable, Category = "DevMenu|Paramer")
-	bool LoadParam(FString LoadFilePath);
+	bool LoadParam(const FString& LoadFilePath, FDevParameter& OutDevParam);
 
 private:
 	template<class T>

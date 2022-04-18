@@ -81,10 +81,11 @@ void FUnrealDevMenuEditorModule::ShutdownModule()
 	// This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
 	// we call this function before unloading the module.
 
+	if ( FAssetToolsModule* AssetToolsModule =
+	         FModuleManager::GetModulePtr<FAssetToolsModule>(TEXT("AssetTools")) )
 	{
 		// アセットタイプアクションをクリアする
-		IAssetTools& AssetTools =
-		    FModuleManager::LoadModuleChecked<FAssetToolsModule>("AssetTools").Get();
+		IAssetTools& AssetTools = AssetToolsModule->Get();
 
 		for ( TSharedPtr<IAssetTypeActions>& Action : CreatedAssetTypeActions )
 		{
@@ -93,14 +94,14 @@ void FUnrealDevMenuEditorModule::ShutdownModule()
 		CreatedAssetTypeActions.Empty();
 	}
 
+	if ( FPropertyEditorModule* PropertyModule =
+	         FModuleManager::GetModulePtr<FPropertyEditorModule>(
+	             TEXT("PropertyEditor")) )
 	{
 		// 詳細タブ拡張を登録解除
-		FPropertyEditorModule& PropertyModule =
-		    FModuleManager::GetModuleChecked<FPropertyEditorModule>(
-		        TEXT("PropertyEditor"));
 
-		PropertyModule.UnregisterCustomPropertyTypeLayout(TEXT("DevMenuBinding"));
-		PropertyModule.UnregisterCustomClassLayout(TEXT("DevParamStructType"));
+		PropertyModule->UnregisterCustomPropertyTypeLayout(TEXT("DevMenuBinding"));
+		PropertyModule->UnregisterCustomClassLayout(TEXT("DevParamStructType"));
 	}
 
 	ToolBarExtensibilityManager.Reset();

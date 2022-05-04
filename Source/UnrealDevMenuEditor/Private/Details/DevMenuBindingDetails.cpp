@@ -81,7 +81,8 @@ TSharedRef<SWidget> SDevMenuBindingFunctionNameWidget::OnGetMenuContent() const
 					continue;
 				}
 
-				FName     FuncName = Func->GetFName();
+				FName     FuncName    = Func->GetFName();
+				FText     FuncTooltip = Func->GetToolTipText();
 				FUIAction Action;
 				Action.ExecuteAction = FExecuteAction::CreateLambda(
 				    [this, FuncName]()
@@ -90,10 +91,8 @@ TSharedRef<SWidget> SDevMenuBindingFunctionNameWidget::OnGetMenuContent() const
 					    FunctionNameProperty->SetValue(FuncName);
 				    });
 
-				MenuBuilder.AddMenuEntry(FText::FromName(FuncName),
-				                         FText::GetEmpty(),
-				                         FSlateIcon(),
-				                         Action);
+				MenuBuilder.AddMenuEntry(
+				    FText::FromName(FuncName), FuncTooltip, FSlateIcon(), Action);
 			}
 		}
 	}
